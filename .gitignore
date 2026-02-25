@@ -1,0 +1,36 @@
+# ==========================================
+# 1. RÁC CỦA BACKEND (SPRING BOOT / JAVA)
+# ==========================================
+backend/target/
+backend/bin/
+backend/.mvn/
+backend/*.jar
+backend/*.war
+
+# ==========================================
+# 2. RÁC CỦA FRONTEND (NODEJS / REACT / VUE)
+# ==========================================
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/npm-debug.log*
+frontend/yarn-error.log*
+
+# ==========================================
+# 3. RÁC CỦA CÁC PHẦN MỀM CODE (IDE)
+# ==========================================
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ==========================================
+# 4. RÁC CỦA HỆ ĐIỀU HÀNH (MAC / WINDOWS)
+# ==========================================
+.DS_Store
+Thumbs.db
