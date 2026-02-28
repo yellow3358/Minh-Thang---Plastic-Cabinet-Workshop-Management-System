@@ -56,19 +56,22 @@ public class DatabaseSeeder implements CommandLineRunner {
         if (userRepository.count() == 0) {
             String defaultPassword = passwordEncoder.encode("123456");
 
-            // Gọi hàm tạo Staff kèm theo MÃ NHÂN VIÊN (employeeId)
-            createStaffUser("admin", defaultPassword, "ROLE_ADMIN", "Nguyễn Quản Trị", "Ban Giám Đốc", "EMP-001");
-            createStaffUser("director", defaultPassword, "ROLE_DIRECTOR", "Trần Giám Đốc", "Ban Giám Đốc", "EMP-002");
-            createStaffUser("sales_manager", defaultPassword, "ROLE_SALES_MANAGER", "Lê Trưởng Phòng Sale", "Phòng Kinh Doanh", "EMP-003");
-            createStaffUser("sale_staff_1", defaultPassword, "ROLE_SALES_STAFF", "Phạm Nhân Viên Sale", "Phòng Kinh Doanh", "EMP-004");
-            createStaffUser("warehouse_manager", defaultPassword, "ROLE_WAREHOUSE_MANAGER", "Hoàng Thủ Kho", "Phòng Kho", "EMP-005");
-            createStaffUser("production_manager", defaultPassword, "ROLE_PRODUCTION_MANAGER", "Đinh Quản Đốc", "Xưởng Sản Xuất", "EMP-006");
-            createStaffUser("accountant", defaultPassword, "ROLE_ACCOUNTANT", "Vũ Kế Toán", "Phòng Kế Toán", "EMP-007");
+            // ĐÃ SỬA: Thêm tham số Email ở cuối mỗi hàm
+            createStaffUser("admin", defaultPassword, "ROLE_ADMIN", "Nguyễn Quản Trị", "Ban Giám Đốc", "EMP-001", "admin_system@gmail.com");
+            createStaffUser("director", defaultPassword, "ROLE_DIRECTOR", "Trần Giám Đốc", "Ban Giám Đốc", "EMP-002", "director@gmail.com");
+            createStaffUser("sales_manager", defaultPassword, "ROLE_SALES_MANAGER", "Lê Trưởng Phòng Sale", "Phòng Kinh Doanh", "EMP-003", "sales_manager@gmail.com");
+            createStaffUser("sale_staff_1", defaultPassword, "ROLE_SALES_STAFF", "Phạm Nhân Viên Sale", "Phòng Kinh Doanh", "EMP-004", "salestaff@gmail.com");
 
-            // Khách hàng thì KHÔNG có hồ sơ Staff (dùng hàm cũ)
-            createCustomerUser("customer_1", defaultPassword, "ROLE_CUSTOMER");
+            // 👉 TÀI KHOẢN DÙNG ĐỂ TEST QUÊN MẬT KHẨU
+            createStaffUser("warehouse_manager", defaultPassword, "ROLE_WAREHOUSE_MANAGER", "Hoàng Thủ Kho", "Phòng Kho", "EMP-005", "loccthe187171@fpt.edu.vn");
 
-            System.out.println("-> Đã tạo 8 User và các hồ sơ Staff thành công!");
+            createStaffUser("production_manager", defaultPassword, "ROLE_PRODUCTION_MANAGER", "Đinh Quản Đốc", "Xưởng Sản Xuất", "EMP-006", "production@gmail.com");
+            createStaffUser("accountant", defaultPassword, "ROLE_ACCOUNTANT", "Vũ Kế Toán", "Phòng Kế Toán", "EMP-007", "accountant@gmail.com");
+
+            // Khách hàng
+            createCustomerUser("customer_1", defaultPassword, "ROLE_CUSTOMER", "customer@gmail.com");
+
+            System.out.println("-> Đã tạo 8 User (có kèm Email) và các hồ sơ Staff thành công!");
         }
 
         // 3. TẠO NGUYÊN VẬT LIỆU MẪU ĐỂ TEST NHẬP KHO
@@ -93,8 +96,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         System.out.println("=== KẾT THÚC SEEDER ===");
     }
 
-    // ĐÃ SỬA: Bổ sung thêm biến employeeId vào hàm
-    private void createStaffUser(String username, String encodedPassword, String roleName, String fullName, String department, String employeeId) {
+    // ĐÃ SỬA: Bổ sung thêm biến email vào chữ ký hàm
+    private void createStaffUser(String username, String encodedPassword, String roleName, String fullName, String department, String employeeId, String email) {
         Role role = roleRepository.findByRoleName(roleName)
                 .orElseThrow(() -> new RuntimeException("Lỗi Seeder: Không tìm thấy Role " + roleName));
 
@@ -103,7 +106,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         user.setUsername(username);
         user.setPassword(encodedPassword);
         user.setRole(role);
-        // user.setIsActive(true);
+        // THÊM EMAIL VÀO ĐÂY:
+        user.setEmail(email);
         User savedUser = userRepository.save(user);
 
         // Tạo hồ sơ Staff nối với User vừa lưu
@@ -113,13 +117,13 @@ public class DatabaseSeeder implements CommandLineRunner {
         // Gắn dữ liệu bắt buộc vào Entity Staff
         staff.setFullname(fullName);
         staff.setDepartment(department);
-        staff.setEmployeeId(employeeId); // Mã nhân viên duy nhất
+        staff.setEmployeeId(employeeId);
 
         staffRepository.save(staff);
     }
 
-    // Hàm tạo Khách hàng (Giữ nguyên)
-    private void createCustomerUser(String username, String encodedPassword, String roleName) {
+    // ĐÃ SỬA: Bổ sung thêm biến email
+    private void createCustomerUser(String username, String encodedPassword, String roleName, String email) {
         Role role = roleRepository.findByRoleName(roleName)
                 .orElseThrow(() -> new RuntimeException("Lỗi Seeder: Không tìm thấy Role " + roleName));
 
@@ -127,7 +131,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         user.setUsername(username);
         user.setPassword(encodedPassword);
         user.setRole(role);
-        // user.setIsActive(true);
+        // THÊM EMAIL VÀO ĐÂY:
+        user.setEmail(email);
         userRepository.save(user);
     }
 }
