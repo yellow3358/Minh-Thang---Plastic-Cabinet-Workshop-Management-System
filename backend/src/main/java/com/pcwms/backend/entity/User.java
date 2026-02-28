@@ -3,6 +3,8 @@ package com.pcwms.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -26,6 +28,15 @@ public class User {
 
     @Column(name = "is_active")
     private Boolean isActive = true;
+
+    @Column(unique = true)
+    private String email;
+
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
 
     // Thêm các trường khác theo ERD của bạn nếu cần (fullname, email...)
     // Nếu là staff thì biến sẽ có dữ liệu
