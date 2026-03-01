@@ -3,6 +3,8 @@ package com.pcwms.backend.security.services; // Giữ nguyên package theo cấu
 import com.pcwms.backend.entity.User;
 import com.pcwms.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,9 @@ public class AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     // ==========================================
     // 1. HÀM XỬ LÝ: GỬI YÊU CẦU QUÊN MẬT KHẨU
@@ -34,14 +39,35 @@ public class AuthService {
         user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
         userRepository.save(user); // Lưu xuống DB
 
-        // 4. In tạm ra màn hình Console để lát nữa Lead copy test trên Postman
-        System.out.println("========== MÃ TOKEN QUÊN MẬT KHẨU ==========");
-        System.out.println("Email yêu cầu: " + email);
-        System.out.println("Mã Token sinh ra: " + token);
-        System.out.println("Hạn sử dụng: 15 phút");
-        System.out.println("============================================");
+       //   TẠO VÀ GỬI EMAIL THẬT
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("[PCWMS Hệ thống] - Yêu cầu khôi phục mật khẩu");
+            message.setText("Chào bạn,\n\n"
+                    + "Hệ thống vừa nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.\n"
+                    + "Vui lòng copy mã Token dưới đây và dán vào ứng dụng để đổi mật khẩu mới:\n\n"
+                    + "MÃ TOKEN: " + token + "\n\n"
+                    + "⚠️ Lưu ý: Mã xác nhận này sẽ hết hạn trong vòng 15 phút.\n"
+                    + "Nếu bạn không yêu cầu đổi mật khẩu, vui lòng bỏ qua email này.\n\n"
+                    + "Trân trọng,\nBan Quản Trị Hệ Thống.");
 
-        return "Đã tạo mã Token thành công. (Vui lòng kiểm tra Console của máy chủ để lấy mã)";
+            mailSender.send(message); // Bấm nút gửi!
+
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi mail: " + e.getMessage());
+            throw new RuntimeException("Lỗi: Không thể gửi email, vui lòng kiểm tra lại cấu hình hệ thống!");
+        }
+        return "Thành công! Một email chứa mã khôi phục đã được gửi đến hòm thư của bạn.";
+
+        // 4. In tạm ra màn hình Console để lát nữa copy test trên Postman
+//        System.out.println("========== MÃ TOKEN QUÊN MẬT KHẨU ==========");
+//        System.out.println("Email yêu cầu: " + email);
+//        System.out.println("Mã Token sinh ra: " + token);
+//        System.out.println("Hạn sử dụng: 15 phút");
+//        System.out.println("============================================");
+//
+//        return "Đã tạo mã Token thành công. (Vui lòng kiểm tra Console của máy chủ để lấy mã)";
     }
 
     // ==========================================
