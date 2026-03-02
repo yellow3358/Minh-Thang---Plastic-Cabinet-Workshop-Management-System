@@ -1,35 +1,37 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Toaster } from "@/components/ui/sonner";
-
-import Login from "./pages/Login";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
-import UserDetail from "./pages/UserDetail";
+import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyEmail from "./pages/VerifyEmail";
+import UserDetail from "./pages/UserDetail";
+import DashboardLayout from "./components/layout/DashboardLayout";
+import SalesDashboard from "./pages/dashboards/SalesDashboard";
+import SalesManagerDashboard from "./pages/dashboards/SalesManagerDashboard";
+import ProductionDashboard from "./pages/dashboards/ProductionDashboard";
+import WarehouseDashboard from "./pages/dashboards/WarehouseDashboard";
 
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
-      <Toaster position="top-center" richColors closeButton duration={3500} />
-
+    <Router>
       <Routes>
-        {/* ========== PUBLIC ROUTES ========== */}
+        {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/user/:id" element={<UserDetail />} />
+        <Route path="/profile" element={<UserDetail />} />
 
-        {/* ========== 404 ========== */}
-        <Route
-          path="*"
-          element={
-            <div className="flex items-center justify-center h-screen text-xl font-bold font-sans">
-              404 - Page Not Found
-            </div>
-          }
-        />
+        {/* Dashboard Routes nested in DashboardLayout */}
+        <Route path="/dashboards" element={<DashboardLayout />}>
+          <Route index element={<Navigate to="/dashboards/sales" replace />} />
+          <Route path="sales" element={<SalesDashboard />} />
+          <Route path="sales-manager" element={<SalesManagerDashboard />} />
+          <Route path="production" element={<ProductionDashboard />} />
+          <Route path="warehouse" element={<WarehouseDashboard />} />
+        </Route>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
+
+export default App;
