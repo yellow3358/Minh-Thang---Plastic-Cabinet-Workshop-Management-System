@@ -7,7 +7,7 @@ import UserDetail from "./pages/UserDetail";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 
-export default function App() {
+export default function AppRouter() {
   return (
     <BrowserRouter>
       <Toaster position="top-center" richColors closeButton duration={3500} />
