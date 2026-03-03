@@ -10,7 +10,7 @@ import SalesManagerDashboard from "./pages/dashboards/SalesManagerDashboard";
 import ProductionDashboard from "./pages/dashboards/ProductionDashboard";
 import WarehouseDashboard from "./pages/dashboards/WarehouseDashboard";
 
-function App() {
+function AppRouter() {
   return (
     <Router>
       <Routes>
@@ -34,4 +34,4 @@ function App() {
   );
 }
 
-export default App;
+export default AppRouter;
