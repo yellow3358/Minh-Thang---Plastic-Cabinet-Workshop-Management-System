@@ -14,11 +14,23 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const menuItems = [
-    { title: "Kinh doanh", icon: BarChart3, path: "/dashboards/sales", color: "text-blue-500" },
-    { title: "Quản lý kinh doanh", icon: LayoutDashboard, path: "/dashboards/sales-manager", color: "text-indigo-500" },
-    { title: "Sản xuất", icon: Factory, path: "/dashboards/production", color: "text-emerald-500" },
-    { title: "Kho bãi", icon: Warehouse, path: "/dashboards/warehouse", color: "text-orange-500" },
+const menuGroups = [
+    {
+        label: "THỐNG KÊ & BÁO CÁO",
+        items: [
+            { title: "Kinh doanh", icon: BarChart3, path: "/dashboards/sales", color: "text-blue-500" },
+            { title: "Quản lý kinh doanh", icon: LayoutDashboard, path: "/dashboards/sales-manager", color: "text-indigo-500" },
+            { title: "Sản xuất", icon: Factory, path: "/dashboards/production", color: "text-emerald-500" },
+            { title: "Kho bãi", icon: Warehouse, path: "/dashboards/warehouse", color: "text-orange-500" },
+        ]
+    },
+    {
+        label: "THÔNG TIN CÁ NHÂN",
+        items: [
+            { title: "Hồ sơ cá nhân", icon: User, path: "/profile", color: "text-slate-400" },
+            { title: "Cấu hình", icon: Settings, path: "/settings", color: "text-slate-400" },
+        ]
+    }
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }) {
@@ -32,56 +44,59 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             )}
         >
             {/* Logo Section */}
-            <div className="p-6 flex items-center justify-between">
+            <div className="p-6 flex items-center gap-3">
+                <div className="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <span className="text-white font-black text-xl italic">M</span>
+                </div>
                 {!collapsed && (
-                    <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-black text-xl">M</span>
-                        </div>
-                        <span className="font-black text-slate-800 text-lg tracking-tighter">MINH THANG</span>
-                    </div>
-                )}
-                {collapsed && (
-                    <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center mx-auto">
-                        <span className="text-white font-black">M</span>
+                    <div className="flex flex-col">
+                        <span className="font-black text-slate-800 text-lg leading-none tracking-tight">Thắng Minh</span>
+                        <span className="text-[10px] font-bold text-slate-400 tracking-wider mt-1 uppercase">PCWMS Dashboards</span>
                     </div>
                 )}
             </div>
 
             {/* Navigation Section */}
-            <nav className="flex-1 px-4 py-4 space-y-2">
-                {menuItems.map((item) => {
-                    const isActive = location.pathname === item.path;
-                    return (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            className={cn(
-                                "flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200 group relative",
-                                isActive
-                                    ? "bg-blue-50 text-blue-600 shadow-sm"
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            )}
-                        >
-                            <item.icon className={cn("h-5 w-5", isActive ? item.color : "group-hover:text-slate-900")} />
-                            {!collapsed && <span className="font-bold text-sm tracking-tight">{item.title}</span>}
-                            {isActive && !collapsed && (
-                                <div className="absolute right-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                            )}
-                        </Link>
-                    )
-                })}
+            <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto scrollbar-none">
+                {menuGroups.map((group, idx) => (
+                    <div key={idx} className="space-y-2">
+                        {!collapsed && (
+                            <div className="px-3 pb-2">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{group.label}</span>
+                            </div>
+                        )}
+                        <div className="space-y-1">
+                            {group.items.map((item) => {
+                                const isActive = location.pathname === item.path;
+                                return (
+                                    <Link
+                                        key={item.path}
+                                        to={item.path}
+                                        className={cn(
+                                            "flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200 group relative",
+                                            isActive
+                                                ? "bg-blue-50 text-blue-600 shadow-sm"
+                                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                        )}
+                                    >
+                                        <item.icon className={cn("h-5 w-5", isActive ? item.color : "group-hover:text-slate-900 transition-colors")} />
+                                        {!collapsed && <span className="font-bold text-sm tracking-tight">{item.title}</span>}
+                                        {isActive && !collapsed && (
+                                            <div className="absolute right-0 h-8 w-1 rounded-l-full bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.4)]" />
+                                        )}
+                                    </Link>
+                                )
+                            })}
+                        </div>
+                    </div>
+                ))}
             </nav>
 
-            {/* Bottom Actions */}
-            <div className="p-4 border-t border-slate-100 space-y-2">
-                <Link to="/profile" className="flex items-center gap-3 px-3 py-3 rounded-2xl text-slate-500 hover:bg-slate-50 transition-all">
-                    <User className="h-5 w-5 text-slate-400" />
-                    {!collapsed && <span className="font-bold text-sm tracking-tight">Hồ sơ cá nhân</span>}
-                </Link>
-                <button className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-rose-500 hover:bg-rose-50 transition-all">
-                    <LogOut className="h-5 w-5" />
-                    {!collapsed && <span className="font-bold text-sm tracking-tight">Đăng xuất</span>}
+            {/* Logout Action at bottom */}
+            <div className="p-4 border-t border-slate-100 mt-auto">
+                <button className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-rose-500 hover:bg-rose-50 transition-all group">
+                    <LogOut className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+                    {!collapsed && <span className="font-bold text-sm tracking-tight italic">Đăng xuất</span>}
                 </button>
             </div>
 
