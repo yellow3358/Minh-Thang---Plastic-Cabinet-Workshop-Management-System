@@ -7,6 +7,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import UserDetail from "./pages/UserDetail";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import SalesDashboard from "./pages/dashboards/SalesDashboard";
+import SalesTeams from "./pages/dashboards/SalesTeams";
 import SalesManagerDashboard from "./pages/dashboards/SalesManagerDashboard";
 import ProductionDashboard from "./pages/dashboards/ProductionDashboard";
 import WarehouseDashboard from "./pages/dashboards/WarehouseDashboard";
@@ -23,19 +24,22 @@ export default function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/profile" element={<UserDetail />} />
-        <Route path="/user/:id" element={<UserDetail />} />
 
         {/* Inventory Legacy (Code từ bạn) */}
         <Route path="/inventory-legacy" element={<AppLegacy />} />
 
         {/* Dashboard Routes nested in DashboardLayout */}
-        <Route path="/dashboards" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="/dashboards/sales" replace />} />
-          <Route path="sales" element={<SalesDashboard />} />
-          <Route path="sales-manager" element={<SalesManagerDashboard />} />
-          <Route path="production" element={<ProductionDashboard />} />
-          <Route path="warehouse" element={<WarehouseDashboard />} />
+        <Route element={<DashboardLayout />}>
+          <Route path="/profile" element={<UserDetail />} />
+          <Route path="/user/:id" element={<UserDetail />} />
+          <Route path="/dashboards">
+            <Route index element={<Navigate to="/dashboards/sales" replace />} />
+            <Route path="sales" element={<SalesDashboard />} />
+            <Route path="sales-teams" element={<SalesTeams />} />
+            <Route path="sales-manager" element={<SalesManagerDashboard />} />
+            <Route path="production" element={<ProductionDashboard />} />
+            <Route path="warehouse" element={<WarehouseDashboard />} />
+          </Route>
         </Route>
 
         {/* 404 Page */}
