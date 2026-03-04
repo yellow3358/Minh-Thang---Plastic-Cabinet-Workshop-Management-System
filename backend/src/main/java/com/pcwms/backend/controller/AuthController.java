@@ -78,34 +78,6 @@ public class AuthController {
     }
 
 
-    // API Đăng ký (Chỉ dành cho Khách hàng tự đăng ký)
-    @PostMapping("/signup")
-    public ResponseEntity<ResponseObject> registerUser(@RequestBody SignupRequest signUpRequest) {
-        // 1. Check trùng username
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            // Dùng throw RuntimeException để cái GlobalExceptionHandler hôm nọ bắt và xử lý cho sạch
-            throw new RuntimeException("Tên đăng nhập đã tồn tại!");
-        }
-
-        // 2. ÉP BUỘC quyền mặc định là CUSTOMER (Không cho phép Frontend tự chọn Role)
-        Role role = roleRepository.findByRoleName("ROLE_CUSTOMER")
-                .orElseThrow(() -> new RuntimeException("Lỗi hệ thống: Không tìm thấy quyền Khách hàng."));
-
-        // 3. Tạo User mới
-        User user = new User();
-        user.setUsername(signUpRequest.getUsername());
-        user.setPassword(encoder.encode(signUpRequest.getPassword())); // Đã mã hóa
-        user.setRole(role);
-        user.setIsActive(true);
-
-        userRepository.save(user);
-
-        // 4. Tuyệt đối KHÔNG trả về object 'user' gốc để tránh lỗi Infinite Recursion
-        return ResponseEntity.ok(
-                new ResponseObject("SUCCESS", "Đăng ký tài khoản thành công!", null)
-        );
-    }
-
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         try {
