@@ -210,278 +210,276 @@ export default function UserDetail() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <div className="max-w-6xl mx-auto space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
-                            <ArrowLeft className="w-4 h-4" />
-                        </Button>
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Chi tiết người dùng</h1>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                        {!isEditing ? (
-                            <Button
-                                onClick={handleEdit}
-                                disabled={loadingUser}
-                                className="bg-gradient-to-r from-purple-600 to-blue-600"
-                            >
-                                <Edit className="w-4 h-4 mr-2" />
-                                Chỉnh sửa
-                            </Button>
-                        ) : (
-                            <>
-                                <Button variant="outline" onClick={handleCancel} disabled={saving}>
-                                    <X className="w-4 h-4 mr-2" />
-                                    Hủy
-                                </Button>
-                                <Button
-                                    onClick={handleSave}
-                                    disabled={saving}
-                                    className="bg-gradient-to-r from-purple-600 to-blue-600"
-                                >
-                                    <Save className="w-4 h-4 mr-2" />
-                                    {saving ? "Đang lưu..." : "Lưu thay đổi"}
-                                </Button>
-                            </>
-                        )}
+        <div className="space-y-6 animate-in fade-in duration-700">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+                        <ArrowLeft className="w-4 h-4" />
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Chi tiết người dùng</h1>
                     </div>
                 </div>
 
-                {/* Alerts */}
-                {showSuccess && (
-                    <Alert className="bg-green-50 border-green-200">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <AlertDescription className="text-green-800">
-                            Cập nhật thông tin người dùng thành công!
-                        </AlertDescription>
-                    </Alert>
-                )}
-
-                {errorMsg && (
-                    <Alert className="bg-red-50 border-red-200">
-                        <AlertCircle className="h-4 w-4 text-red-600" />
-                        <AlertDescription className="text-red-800">{errorMsg}</AlertDescription>
-                    </Alert>
-                )}
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left - Summary */}
-                    <div className="lg:col-span-1">
-                        <Card>
-                            <CardContent className="p-6">
-                                <div className="flex flex-col items-center text-center">
-                                    <Avatar className="w-24 h-24 mb-4">
-                                        <AvatarFallback className="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-2xl">
-                                            {initials}
-                                        </AvatarFallback>
-                                    </Avatar>
-
-                                    <h3 className="text-xl font-bold text-gray-900">
-                                        {loadingUser ? "Loading..." : userData.hoTen || "—"}
-                                    </h3>
-
-                                    <p className="text-gray-600 mb-2">@{userData.tenDangNhap || "—"}</p>
-
-                                    <Badge className="mb-4" variant="outline">
-                                        <Shield className="w-3 h-3 mr-1" />
-                                        {getVaiTroLabel(userData.vaiTro)}
-                                    </Badge>
-
-                                    <div className="flex items-center gap-2 mb-6">
-                                        <div className={`w-2 h-2 rounded-full ${isActive ? "bg-green-500" : "bg-gray-400"}`} />
-                                        <span className={`text-sm font-medium ${isActive ? "text-green-600" : "text-gray-600"}`}>
-                                            {isActive ? "Đang hoạt động" : "Không hoạt động"}
-                                        </span>
-                                    </div>
-
-                                    <div className="w-full space-y-3 text-left border-t pt-4">
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Calendar className="w-4 h-4" />
-                                            <span>Ngày tạo: {formatDateTime(userData.ngayTao)}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Clock className="w-4 h-4" />
-                                            <span>Cập nhật: {formatDateTime(userData.ngayCapNhat)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="mt-4">
-                            <CardHeader>
-                                <CardTitle className="text-base">Thông tin hệ thống</CardTitle>
-                                <CardDescription>Thông tin quan trọng</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-2 text-sm text-gray-700">
-                                <div className="flex justify-between">
-                                    <span>ID</span>
-                                    <span className="font-medium">{userData.id ?? "—"}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Vai trò</span>
-                                    <span className="font-medium">{getVaiTroLabel(userData.vaiTro)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Trạng thái</span>
-                                    <span className="font-medium">{isActive ? "Hoạt động" : "Không hoạt động"}</span>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Right - Tabs */}
-                    <div className="lg:col-span-2">
-                        <Tabs
-                            defaultValue="info"
-                            className="space-y-4"
-                            onValueChange={(v) => {
-                                if (v === "activity") fetchActivities();
-                            }}
+                <div className="flex gap-2">
+                    {!isEditing ? (
+                        <Button
+                            onClick={handleEdit}
+                            disabled={loadingUser}
+                            className="bg-gradient-to-r from-purple-600 to-blue-600"
                         >
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="info">Thông tin</TabsTrigger>
-                                <TabsTrigger value="activity">Hoạt động</TabsTrigger>
-                            </TabsList>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Chỉnh sửa
+                        </Button>
+                    ) : (
+                        <>
+                            <Button variant="outline" onClick={handleCancel} disabled={saving}>
+                                <X className="w-4 h-4 mr-2" />
+                                Hủy
+                            </Button>
+                            <Button
+                                onClick={handleSave}
+                                disabled={saving}
+                                className="bg-gradient-to-r from-purple-600 to-blue-600"
+                            >
+                                <Save className="w-4 h-4 mr-2" />
+                                {saving ? "Đang lưu..." : "Lưu thay đổi"}
+                            </Button>
+                        </>
+                    )}
+                </div>
+            </div>
 
-                            {/* Tab: Thông tin */}
-                            <TabsContent value="info">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Thông tin người dùng</CardTitle>
-                                        {/* <CardDescription>
+            {/* Alerts */}
+            {showSuccess && (
+                <Alert className="bg-green-50 border-green-200">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                        Cập nhật thông tin người dùng thành công!
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            {errorMsg && (
+                <Alert className="bg-red-50 border-red-200">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <AlertDescription className="text-red-800">{errorMsg}</AlertDescription>
+                </Alert>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left - Summary */}
+                <div className="lg:col-span-1">
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex flex-col items-center text-center">
+                                <Avatar className="w-24 h-24 mb-4">
+                                    <AvatarFallback className="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-2xl">
+                                        {initials}
+                                    </AvatarFallback>
+                                </Avatar>
+
+                                <h3 className="text-xl font-bold text-gray-900">
+                                    {loadingUser ? "Loading..." : userData.hoTen || "—"}
+                                </h3>
+
+                                <p className="text-gray-600 mb-2">@{userData.tenDangNhap || "—"}</p>
+
+                                <Badge className="mb-4" variant="outline">
+                                    <Shield className="w-3 h-3 mr-1" />
+                                    {getVaiTroLabel(userData.vaiTro)}
+                                </Badge>
+
+                                <div className="flex items-center gap-2 mb-6">
+                                    <div className={`w-2 h-2 rounded-full ${isActive ? "bg-green-500" : "bg-gray-400"}`} />
+                                    <span className={`text-sm font-medium ${isActive ? "text-green-600" : "text-gray-600"}`}>
+                                        {isActive ? "Đang hoạt động" : "Không hoạt động"}
+                                    </span>
+                                </div>
+
+                                <div className="w-full space-y-3 text-left border-t pt-4">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Calendar className="w-4 h-4" />
+                                        <span>Ngày tạo: {formatDateTime(userData.ngayTao)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Clock className="w-4 h-4" />
+                                        <span>Cập nhật: {formatDateTime(userData.ngayCapNhat)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="mt-4">
+                        <CardHeader>
+                            <CardTitle className="text-base">Thông tin hệ thống</CardTitle>
+                            <CardDescription>Thông tin quan trọng</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-2 text-sm text-gray-700">
+                            <div className="flex justify-between">
+                                <span>ID</span>
+                                <span className="font-medium">{userData.id ?? "—"}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Vai trò</span>
+                                <span className="font-medium">{getVaiTroLabel(userData.vaiTro)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Trạng thái</span>
+                                <span className="font-medium">{isActive ? "Hoạt động" : "Không hoạt động"}</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Right - Tabs */}
+                <div className="lg:col-span-2">
+                    <Tabs
+                        defaultValue="info"
+                        className="space-y-4"
+                        onValueChange={(v) => {
+                            if (v === "activity") fetchActivities();
+                        }}
+                    >
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="info">Thông tin</TabsTrigger>
+                            <TabsTrigger value="activity">Hoạt động</TabsTrigger>
+                        </TabsList>
+
+                        {/* Tab: Thông tin */}
+                        <TabsContent value="info">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Thông tin người dùng</CardTitle>
+                                    {/* <CardDescription>
                                             {isEditing ? "Chỉnh sửa các trường cho phép cập nhật" : "Chế độ chỉ xem (read-only)"}
                                         </CardDescription> */}
-                                    </CardHeader>
+                                </CardHeader>
 
-                                    <CardContent className="space-y-6">
-                                        {/* tenDangNhap */}
+                                <CardContent className="space-y-6">
+                                    {/* tenDangNhap */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="tenDangNhap" className="flex items-center gap-2">
+                                            <User className="w-4 h-4 text-gray-500" />
+                                            Tên đăng nhập
+                                        </Label>
+                                        <Input
+                                            id="tenDangNhap"
+                                            value={userData.tenDangNhap}
+                                            readOnly
+                                            disabled
+                                            className="bg-gray-50"
+                                        />
+                                    </div>
+
+                                    {/* hoTen */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="hoTen">Họ và tên</Label>
+                                        <Input
+                                            id="hoTen"
+                                            value={isEditing ? editedData.hoTen : userData.hoTen}
+                                            onChange={(e) => handleInputChange("hoTen", e.target.value)}
+                                            disabled={!isEditing || loadingUser}
+                                            className={!isEditing ? "bg-gray-50" : ""}
+                                        />
+                                    </div>
+
+                                    {/* email */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email" className="flex items-center gap-2">
+                                            <Mail className="w-4 h-4 text-gray-500" />
+                                            Email
+                                        </Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            value={userData.email}
+                                            readOnly
+                                            disabled
+                                            className="bg-gray-50"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="soDienThoai" className="flex items-center gap-2">
+                                            <Phone className="w-4 h-4 text-gray-500" />
+                                            Số điện thoại
+                                        </Label>
+                                        <Input
+                                            id="soDienThoai"
+                                            value={isEditing ? editedData.soDienThoai : userData.soDienThoai}
+                                            onChange={(e) => handleInputChange("soDienThoai", e.target.value)}
+                                            disabled={!isEditing || loadingUser}
+                                            className={!isEditing ? "bg-gray-50" : ""}
+                                        />
+                                    </div>
+
+                                    {/* password - only writable in edit mode */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="password" className="flex items-center gap-2">
+                                            <Shield className="w-4 h-4 text-gray-500" />
+                                            Mật khẩu
+                                        </Label>
+                                        <Input
+                                            id="password"
+                                            type="password"
+                                            value={isEditing ? (editedData.password || "") : "********"}
+                                            placeholder={isEditing ? "Nhập mật khẩu mới" : ""}
+                                            onChange={(e) => handleInputChange("password", e.target.value)}
+                                            disabled={!isEditing || loadingUser}
+                                            className={!isEditing ? "bg-gray-50" : ""}
+                                        />
+                                    </div>
+
+                                    {/* read-only fields */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="tenDangNhap" className="flex items-center gap-2">
-                                                <User className="w-4 h-4 text-gray-500" />
-                                                Tên đăng nhập
-                                            </Label>
-                                            <Input
-                                                id="tenDangNhap"
-                                                value={userData.tenDangNhap}
-                                                readOnly
-                                                disabled
-                                                className="bg-gray-50"
-                                            />
+                                            <Label>Vai trò</Label>
+                                            <Input value={getVaiTroLabel(userData.vaiTro)} disabled className="bg-gray-50" />
                                         </div>
-
-                                        {/* hoTen */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="hoTen">Họ và tên</Label>
-                                            <Input
-                                                id="hoTen"
-                                                value={isEditing ? editedData.hoTen : userData.hoTen}
-                                                onChange={(e) => handleInputChange("hoTen", e.target.value)}
-                                                disabled={!isEditing || loadingUser}
-                                                className={!isEditing ? "bg-gray-50" : ""}
-                                            />
+                                            <Label>Trạng thái</Label>
+                                            <Input value={isActive ? "Hoạt động" : "Không hoạt động"} disabled className="bg-gray-50" />
                                         </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
 
-                                        {/* email */}
-                                        <div className="space-y-2">
-                                            <Label htmlFor="email" className="flex items-center gap-2">
-                                                <Mail className="w-4 h-4 text-gray-500" />
-                                                Email
-                                            </Label>
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                value={userData.email}
-                                                readOnly
-                                                disabled
-                                                className="bg-gray-50"
-                                            />
-                                        </div>
+                        {/* Tab: Hoạt động */}
+                        <TabsContent value="activity">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Lịch sử hoạt động</CardTitle>
+                                    <CardDescription>Demo UI — cắm API sau</CardDescription>
+                                </CardHeader>
 
-                                        <div className="space-y-2">
-                                            <Label htmlFor="soDienThoai" className="flex items-center gap-2">
-                                                <Phone className="w-4 h-4 text-gray-500" />
-                                                Số điện thoại
-                                            </Label>
-                                            <Input
-                                                id="soDienThoai"
-                                                value={isEditing ? editedData.soDienThoai : userData.soDienThoai}
-                                                onChange={(e) => handleInputChange("soDienThoai", e.target.value)}
-                                                disabled={!isEditing || loadingUser}
-                                                className={!isEditing ? "bg-gray-50" : ""}
-                                            />
-                                        </div>
+                                <CardContent className="space-y-3">
+                                    {loadingActivities && <div className="text-sm text-gray-600">Đang tải hoạt động...</div>}
 
-                                        {/* password - only writable in edit mode */}
-                                        <div className="space-y-2">
-                                            <Label htmlFor="password" className="flex items-center gap-2">
-                                                <Shield className="w-4 h-4 text-gray-500" />
-                                                Mật khẩu
-                                            </Label>
-                                            <Input
-                                                id="password"
-                                                type="password"
-                                                value={isEditing ? (editedData.password || "") : "********"}
-                                                placeholder={isEditing ? "Nhập mật khẩu mới" : ""}
-                                                onChange={(e) => handleInputChange("password", e.target.value)}
-                                                disabled={!isEditing || loadingUser}
-                                                className={!isEditing ? "bg-gray-50" : ""}
-                                            />
-                                        </div>
+                                    {!loadingActivities &&
+                                        activities.map((a, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                            >
+                                                <div className={`p-2 rounded-lg ${activityBg(a.type)}`}>{activityIcon(a.type)}</div>
 
-                                        {/* read-only fields */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>Vai trò</Label>
-                                                <Input value={getVaiTroLabel(userData.vaiTro)} disabled className="bg-gray-50" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Trạng thái</Label>
-                                                <Input value={isActive ? "Hoạt động" : "Không hoạt động"} disabled className="bg-gray-50" />
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
-
-                            {/* Tab: Hoạt động */}
-                            <TabsContent value="activity">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Lịch sử hoạt động</CardTitle>
-                                        <CardDescription>Demo UI — cắm API sau</CardDescription>
-                                    </CardHeader>
-
-                                    <CardContent className="space-y-3">
-                                        {loadingActivities && <div className="text-sm text-gray-600">Đang tải hoạt động...</div>}
-
-                                        {!loadingActivities &&
-                                            activities.map((a, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                                                >
-                                                    <div className={`p-2 rounded-lg ${activityBg(a.type)}`}>{activityIcon(a.type)}</div>
-
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center justify-between gap-2">
-                                                            <p className="font-medium text-gray-900">{a.title}</p>
-                                                            <span className="text-xs text-gray-500">{formatDateTime(a.at)}</span>
-                                                        </div>
-                                                        <p className="text-sm text-gray-600 mt-1">{a.detail}</p>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <p className="font-medium text-gray-900">{a.title}</p>
+                                                        <span className="text-xs text-gray-500">{formatDateTime(a.at)}</span>
                                                     </div>
+                                                    <p className="text-sm text-gray-600 mt-1">{a.detail}</p>
                                                 </div>
-                                            ))}
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
-                        </Tabs>
-                    </div>
+                                            </div>
+                                        ))}
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </div>
         </div>

@@ -1,37 +1,84 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import VerifyEmail from "./pages/VerifyEmail";
-import UserDetail from "./pages/UserDetail";
-import DashboardLayout from "./components/layout/DashboardLayout";
-import SalesDashboard from "./pages/dashboards/SalesDashboard";
-import SalesManagerDashboard from "./pages/dashboards/SalesManagerDashboard";
-import ProductionDashboard from "./pages/dashboards/ProductionDashboard";
-import WarehouseDashboard from "./pages/dashboards/WarehouseDashboard";
+import { useState } from "react";
+import companyLogo from "../image/logominhthang.jpg";
+import "./App.css";
 
-function App() {
+const featureMenus = [
+  "Monitor Low Stock",
+  "View Inventory Transaction History",
+  "Manage Inventory by Batch",
+];
+
+function Sidebar({ collapsed, onToggle }) {
   return (
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/profile" element={<UserDetail />} />
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <img src={companyLogo} alt="Logo Minh Thang" className="company-logo" />
+        <h1 className="company-name">Minh Thang Plastic Cabinet </h1>
+      </div>
 
-        {/* Dashboard Routes nested in DashboardLayout */}
-        <Route path="/dashboards" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="/dashboards/sales" replace />} />
-          <Route path="sales" element={<SalesDashboard />} />
-          <Route path="sales-manager" element={<SalesManagerDashboard />} />
-          <Route path="production" element={<ProductionDashboard />} />
-          <Route path="warehouse" element={<WarehouseDashboard />} />
-        </Route>
-      </Routes>
-    </Router>
+      <div className="sidebar-module-title">
+        <span>Inventory Monitoring</span>
+      </div>
+
+      <button
+        className="sidebar-toggle"
+        type="button"
+        aria-label={collapsed ? "Mở thanh bên" : "Ẩn thanh bên"}
+        onClick={onToggle}
+      >
+        <span className="toggle-icon">☰</span>
+      </button>
+    </aside>
   );
 }
 
-export default App;
+function TopNav() {
+  return (
+    <header className="top-nav">
+      <nav className="feature-nav" aria-label="Điều hướng tính năng tồn kho">
+        {featureMenus.map((item, index) => (
+          <a key={item} href="#" className={`feature-link ${index === 0 ? "active" : ""}`}>
+            {item}
+          </a>
+        ))}
+      </nav>
+
+      <div className="account-actions">
+        <a href="#" className="profile-link" aria-label="Trang thông tin cá nhân">
+          <span className="profile-icon">👤</span>
+        </a>
+        <button className="logout-button" type="button">
+          Logout
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function MainContent() {
+  return (
+    <section className="content-area" aria-label="Khu vực hiển thị dữ liệu">
+      <div className="empty-placeholder">
+        <p>.</p>
+      </div>
+    </section>
+  );
+}
+
+export default function App() {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  return (
+    <div className={`app-layout ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <Sidebar
+        collapsed={isSidebarCollapsed}
+        onToggle={() => setIsSidebarCollapsed((previous) => !previous)}
+      />
+
+      <main className="main-content">
+        <TopNav />
+        <MainContent />
+      </main>
+    </div>
+  );
+}
