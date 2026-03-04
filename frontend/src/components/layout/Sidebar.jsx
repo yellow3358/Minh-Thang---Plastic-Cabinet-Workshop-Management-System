@@ -23,13 +23,6 @@ const menuGroups = [
             { title: "Sản xuất", icon: Factory, path: "/dashboards/production", color: "text-emerald-500" },
             { title: "Kho bãi", icon: Warehouse, path: "/dashboards/warehouse", color: "text-orange-500" },
         ]
-    },
-    {
-        label: "THÔNG TIN CÁ NHÂN",
-        items: [
-            { title: "Hồ sơ cá nhân", icon: User, path: "/profile", color: "text-slate-400" },
-            { title: "Cấu hình", icon: Settings, path: "/settings", color: "text-slate-400" },
-        ]
     }
 ];
 
@@ -39,7 +32,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     return (
         <aside
             className={cn(
-                "fixed left-0 top-0 h-screen bg-white border-r border-slate-200 transition-all duration-300 z-50 flex flex-col",
+                "sticky top-0 h-screen bg-white border-r border-slate-200 transition-all duration-300 z-50 flex flex-col shrink-0",
                 collapsed ? "w-20" : "w-64"
             )}
         >
