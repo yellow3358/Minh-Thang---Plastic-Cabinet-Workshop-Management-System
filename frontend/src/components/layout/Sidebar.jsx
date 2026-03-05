@@ -8,7 +8,9 @@ import {
     Settings,
     LogOut,
     ChevronLeft,
-    Menu
+    Menu,
+    Package,
+    Users
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,18 @@ const menuGroups = [
             { title: "Quản lý kinh doanh", icon: LayoutDashboard, path: "/dashboards/sales-manager", color: "text-indigo-500" },
             { title: "Sản xuất", icon: Factory, path: "/dashboards/production", color: "text-emerald-500" },
             { title: "Kho bãi", icon: Warehouse, path: "/dashboards/warehouse", color: "text-orange-500" },
+        ]
+    },
+    {
+        label: "QUẢN LÝ KHO & SẢN PHẨM",
+        items: [
+            { title: "Sản phẩm", icon: Package, path: "/dashboards/inventory/products", color: "text-blue-600" },
+        ]
+    },
+    {
+        label: "CẤU HÌNH HỆ THỐNG",
+        items: [
+            { title: "Quản lý người dùng", icon: Users, path: "/dashboards/settings/users", color: "text-blue-600" },
         ]
     }
 ];
@@ -87,13 +101,6 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                 ))}
             </nav>
 
-            {/* Logout Action at bottom */}
-            <div className="p-4 border-t border-slate-100 mt-auto">
-                <button className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-rose-500 hover:bg-rose-50 transition-all group">
-                    <LogOut className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
-                    {!collapsed && <span className="font-bold text-sm tracking-tight italic">Đăng xuất</span>}
-                </button>
-            </div>
 
             {/* Toggle Button */}
             <button
