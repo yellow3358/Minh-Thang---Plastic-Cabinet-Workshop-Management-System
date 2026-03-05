@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from 'react-router-dom';
-import { nguoiDungService } from '../services/nguoiDungService';
+import { userService } from '../services/userService';
 import { Card, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
@@ -92,10 +92,10 @@ export default function AuthPage() {
                 username: loginData.username,
                 password: loginData.matKhau
             };
-            const response = await nguoiDungService.login(payload);
+            const response = await userService.login(payload);
 
             if (response && response.status === 'SUCCESS') {
-                // Login success - Token is already saved in nguoiDungService.login
+                // Login success - Token is already saved in userService.login
 
                 // Get token and decode to check role
                 const token = localStorage.getItem('access_token');
@@ -145,7 +145,7 @@ export default function AuthPage() {
                     // Add other fields if necessary
                 };
 
-                const response = await nguoiDungService.register(payload);
+                const response = await userService.register(payload);
 
                 if (response && response.status === 'SUCCESS') {
                     // Register success, redirect to verify email page

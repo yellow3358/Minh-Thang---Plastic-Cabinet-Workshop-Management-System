@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { nguoiDungService } from '../services/nguoiDungService';
+import { userService } from '../services/userService';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
@@ -69,7 +69,7 @@ export default function VerifyEmail() {
                 otp: otpValue
             };
 
-            const response = await nguoiDungService.verifyAccount(payload);
+            const response = await userService.verifyAccount(payload);
 
             if (response && response.status === 200) {
                 setSuccess(true);
@@ -93,7 +93,7 @@ export default function VerifyEmail() {
         setErrors({});
 
         try {
-            const response = await nguoiDungService.resendOTP(email);
+            const response = await userService.resendOTP(email);
 
             if (response && response.status === 200) {
                 setErrors({ success: 'Mã OTP đã được gửi lại' });

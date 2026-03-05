@@ -1,16 +1,16 @@
 import apiClient from "./apiClient";
 
-export const nguoiDungService = {
+export const userService = {
 
     async getById(id) {
-        const res = await apiClient.get(`/api/v1/nguoi-dung/get-by-id/${id}`);
-        return res.data; // ResponseData<NguoiDungDto>
+        const res = await apiClient.get(`/api/v1/users/get-by-id/${id}`);
+        return res.data; // ResponseData<UserDto>
     },
 
     async updateUser(payload) {
         // payload: { id, tenDangNhap, hoTen, email, soDienThoai }
-        const res = await apiClient.put("/api/v1/nguoi-dung/update", payload);
-        return res.data; // ResponseData<NguoiDungDto>
+        const res = await apiClient.put("/api/v1/users/update", payload);
+        return res.data; // ResponseData<UserDto>
     },
 
     async register(payload) {
@@ -34,30 +34,30 @@ export const nguoiDungService = {
 
     async verifyAccount(payload) {
         // dùng cho KÍCH HOẠT TÀI KHOẢN (register)
-        const res = await apiClient.post("/api/v1/nguoi-dung/active-account", payload, { skipAuth: true });
+        const res = await apiClient.post("/api/v1/users/active-account", payload, { skipAuth: true });
         return res.data;
     },
 
     async resendOTP(email) {
-        const res = await apiClient.post("/api/v1/nguoi-dung/resend-otp", { email }, { skipAuth: true });
+        const res = await apiClient.post("/api/v1/users/resend-otp", { email }, { skipAuth: true });
         return res.data;
     },
 
     async sendForgotPasswordOTP(usernameOrEmail) {
-        // BE expects: { username }
+        // Cập nhật endpoint thành /api/v1/auth/forgot-password theo Backend
         const res = await apiClient.post(
-            "/api/v1/nguoi-dung/forgot-password",
-            { username: usernameOrEmail },
+            "/api/v1/auth/forgot-password",
+            { email: usernameOrEmail }, // Đổi thành email theo như AuthController 
             { skipAuth: true }
         );
         return res.data;
     },
 
-    async resetPassword({ username, otp, password }) {
-        // BE expects: { username, otp, password }
+    async resetPassword({ token, newPassword }) {
+        // Cập nhật endpoint thành /api/v1/auth/reset-password theo Backend
         const res = await apiClient.post(
-            "/api/v1/nguoi-dung/reset-password",
-            { username, otp, password },
+            "/api/v1/auth/reset-password",
+            { token, newPassword }, // Cập nhật tham số theo ResetPasswordRequest của Backend
             { skipAuth: true }
         );
         return res.data;
@@ -65,6 +65,9 @@ export const nguoiDungService = {
 
     logout() {
         localStorage.removeItem("access_token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("username");
+        localStorage.removeItem("userId");
     },
 
     getToken() {
@@ -72,9 +75,8 @@ export const nguoiDungService = {
     },
 
     async changePassword(payload) {
-        const res = await apiClient.post("/api/v1/nguoi-dung/change-password", payload);
+        const res = await apiClient.post("/api/v1/users/change-password", payload);
         return res.data;
     },
-
 
 };
