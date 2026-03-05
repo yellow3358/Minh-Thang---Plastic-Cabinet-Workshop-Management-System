@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { nguoiDungService } from "@/services/nguoiDungService";
+import { userService } from "@/services/userService";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,7 +98,7 @@ export default function UserDetail() {
             setLoadingUser(true);
 
             try {
-                const res = await nguoiDungService.getById(id);
+                const res = await userService.getById(id);
                 const dto = res?.data; // ResponseData.data
                 if (!dto) throw new Error("Không nhận được data người dùng từ server");
 
@@ -168,14 +168,14 @@ export default function UserDetail() {
             }
 
             // 1. Update info
-            const res = await nguoiDungService.updateUser(payload);
+            const res = await userService.updateUser(payload);
             const updatedDto = res?.data; // ResponseData.data
             if (!updatedDto) throw new Error("Cập nhật thành công nhưng response thiếu data");
 
             // 2. Change password if entered
             if (editedData.password && editedData.password.trim().length > 0) {
                 // Assuming BE needs { id, password } or similar
-                await nguoiDungService.changePassword({
+                await userService.changePassword({
                     id: Number(userData.id),
                     password: editedData.password.trim()
                 });

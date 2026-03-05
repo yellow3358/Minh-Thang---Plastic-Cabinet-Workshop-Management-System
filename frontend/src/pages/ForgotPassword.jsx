@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { nguoiDungService } from "../services/nguoiDungService";
+import { userService } from "../services/userService";
 
 import { Card, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
 
         setIsLoading(true);
         try {
-            const res = await nguoiDungService.sendForgotPasswordOTP(trimmed);
+            const res = await userService.sendForgotPasswordOTP(trimmed);
             if (res?.status === 200) {
                 setUsername(trimmed);
                 setOtp(["", "", "", "", "", ""]);
@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
 
         setIsLoading(true);
         try {
-            const res = await nguoiDungService.resetPassword({
+            const res = await userService.resetPassword({
                 username: trimmed,
                 otp: otpValue,
                 password: newPassword,
@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
 
         setIsLoading(true);
         try {
-            const res = await nguoiDungService.sendForgotPasswordOTP(trimmed);
+            const res = await userService.sendForgotPasswordOTP(trimmed);
             if (res?.status === 200) {
                 setOtp(["", "", "", "", "", ""]);
                 setFieldError("success", "OTP đã được gửi lại");
