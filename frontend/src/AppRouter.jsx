@@ -11,6 +11,8 @@ import SalesTeams from "./pages/dashboards/SalesTeams";
 import SalesManagerDashboard from "./pages/dashboards/SalesManagerDashboard";
 import ProductionDashboard from "./pages/dashboards/ProductionDashboard";
 import WarehouseDashboard from "./pages/dashboards/WarehouseDashboard";
+import WarehouseReceipts from "./pages/dashboards/WarehouseReceipts";
+import WarehouseDeliveryOrders from "./pages/dashboards/WarehouseDeliveryOrders";
 import AppLegacy from "./App"; // Giao diện từ bạn của user
 
 export default function AppRouter() {
@@ -39,6 +41,8 @@ export default function AppRouter() {
             <Route path="sales-manager" element={<SalesManagerDashboard />} />
             <Route path="production" element={<ProductionDashboard />} />
             <Route path="warehouse" element={<WarehouseDashboard />} />
+            <Route path="warehouse/receipts" element={<WarehouseReceipts />} />
+            <Route path="warehouse/delivery-orders" element={<WarehouseDeliveryOrders />} />
           </Route>
         </Route>
 
