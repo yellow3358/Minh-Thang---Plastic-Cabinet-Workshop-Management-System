@@ -35,6 +35,9 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private WarehouseTransactionRepository warehouseTransactionRepository;
+
     @Override
     public void run(String... args) throws Exception {
         System.out.println("=== BẮT ĐẦU KIỂM TRA & TẠO DỮ LIỆU MẪU ===");
@@ -104,6 +107,64 @@ public class DatabaseSeeder implements CommandLineRunner {
             productRepository.save(p1);
 
             System.out.println("-> Đã tạo 1 Thành phẩm mẫu.");
+        }
+
+        // 5. TẠO PHIẾU KHO MẪU ĐỂ TEST API (BẢN NÂNG CẤP NHIỀU DATA)
+        if (warehouseTransactionRepository.count() == 0) {
+            // Lấy thủ kho và hàng hóa ra
+            Staff thuKho = staffRepository.findAll().stream()
+                    .filter(s -> s.getUser().getUsername().equals("warehouse_manager"))
+                    .findFirst()
+                    .orElse(null);
+
+            Product banLamViec = productRepository.findAll().stream().findFirst().orElse(null);
+            Material goSoi = materialRepository.findAll().stream().findFirst().orElse(null);
+
+            if (thuKho != null && banLamViec != null && goSoi != null) {
+
+                // --- 1. TẠO 1 PHIẾU NHẬP KHO VẬT TƯ TRƯỚC ---
+                WarehouseTransaction phieuNhap = new WarehouseTransaction();
+                phieuNhap.setType(TransactionType.IMPORT);
+                phieuNhap.setReferenceId("PO-SUPPLIER-999");
+                phieuNhap.setDate(java.time.LocalDateTime.now().minusDays(10)); // Nhập từ 10 ngày trước
+                phieuNhap.setStaff(thuKho);
+
+                TransactionDetail chiTietNhap = new TransactionDetail();
+                chiTietNhap.setWarehouseTransaction(phieuNhap);
+                chiTietNhap.setMaterial(goSoi);
+                chiTietNhap.setQuantity(500); // Nhập hẳn 500 khối cho xôm
+
+                phieuNhap.setDetails(List.of(chiTietNhap));
+                warehouseTransactionRepository.save(phieuNhap);
+
+
+                // --- 2. DÙNG VÒNG LẶP ĐẺ RA 15 PHIẾU XUẤT KHO ---
+                for (int i = 1; i <= 15; i++) {
+                    WarehouseTransaction phieuXuat = new WarehouseTransaction();
+                    phieuXuat.setType(TransactionType.EXPORT);
+
+                    // Logic trộn mã đơn để test Tìm kiếm: Cứ chia hết cho 3 thì là đơn VIP, còn lại đơn NORMAL
+                    if (i % 3 == 0) {
+                        phieuXuat.setReferenceId("SO-VIP-2026-00" + i);
+                    } else {
+                        phieuXuat.setReferenceId("SO-NORMAL-2026-00" + i);
+                    }
+
+                    // Lùi ngày giờ từ từ để test tính năng Sắp xếp (Phiếu mới nhất hiện lên đầu)
+                    phieuXuat.setDate(java.time.LocalDateTime.now().minusHours(i));
+                    phieuXuat.setStaff(thuKho);
+
+                    TransactionDetail chiTietXuat = new TransactionDetail();
+                    chiTietXuat.setWarehouseTransaction(phieuXuat);
+                    chiTietXuat.setProduct(banLamViec);
+                    chiTietXuat.setQuantity(i); // Số lượng xuất ngẫu nhiên theo biến i (1, 2, 3...)
+
+                    phieuXuat.setDetails(List.of(chiTietXuat));
+                    warehouseTransactionRepository.save(phieuXuat);
+                }
+
+                System.out.println("-> Đã tạo 1 Phiếu Nhập và 15 Phiếu Xuất kho mẫu thành công (Sẵn sàng test Phân trang)!");
+            }
         }
 
         System.out.println("=== KẾT THÚC SEEDER ===");
