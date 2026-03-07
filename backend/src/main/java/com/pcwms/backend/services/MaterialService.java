@@ -16,6 +16,10 @@ public class MaterialService {
     @Autowired
     private MaterialRepository materialRepository;
 
+    public MaterialResponse getMaterialDetail(Long id) {
+        Material material = getMaterialById(id);
+        return new MaterialResponse(material);
+    }
     // 1. UPDATE: Lấy toàn bộ danh sách kèm logic Cảnh báo (Low Stock Alert)
     public List<MaterialResponse> getAllMaterialsWithAlert() {
         // Chỉ lấy những vật tư đang hoạt động (active = true)

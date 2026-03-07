@@ -30,7 +30,11 @@ public class MaterialController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseObject> getMaterialById(@PathVariable Long id) {
         return ResponseEntity.ok(
-                new ResponseObject("SUCCESS", "Lấy chi tiết thành công", materialService.getMaterialById(id))
+                new ResponseObject(
+                        "SUCCESS",
+                        "Lấy chi tiết thành công",
+                        materialService.getMaterialDetail(id) // 👉 ĐỔI TÊN HÀM Ở ĐÚNG CHỖ NÀY!
+                )
         );
     }
 

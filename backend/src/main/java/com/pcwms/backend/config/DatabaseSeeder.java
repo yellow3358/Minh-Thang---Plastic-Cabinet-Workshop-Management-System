@@ -37,6 +37,12 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Autowired
     private WarehouseTransactionRepository warehouseTransactionRepository;
 
+    @Autowired
+    private SupplierRepository supplierRepository;
+
+    @Autowired
+    private SupplierMaterialRepository supplierMaterialRepository;
+
     @Override
     public void run(String... args) throws Exception {
         System.out.println("=== BẮT ĐẦU KIỂM TRA & TẠO DỮ LIỆU MẪU ===");
@@ -145,6 +151,32 @@ public class DatabaseSeeder implements CommandLineRunner {
             productRepository.save(p1);
 
             System.out.println("-> Đã tạo 1 Thành phẩm mẫu.");
+        }
+
+        // 4.1 TẠO NHÀ CUNG CẤP & NỐI VỚI VẬT TƯ (BẢNG TRUNG GIAN)
+        if (supplierRepository.count() == 0) {
+            // Tạo 1 ông Nhà cung cấp xịn
+            Supplier sup1 = new Supplier();
+            sup1.setName("Công ty TNHH Gỗ Trường Thành");
+            sup1.setContactInfo("0909123456 - KCN Sóng Thần, Bình Dương");
+            supplierRepository.save(sup1);
+
+            // Tìm lại ông "Gỗ Sồi Nga" vừa tạo ở trên
+            Material goSoi = materialRepository.findAll().stream()
+                    .filter(m -> m.getName().equals("Gỗ Sồi Nga"))
+                    .findFirst()
+                    .orElse(null);
+
+            // Tiến hành nối dây và báo giá nhập
+            if (goSoi != null) {
+                SupplierMaterial sm = new SupplierMaterial();
+                sm.setSupplier(sup1);
+                sm.setMaterial(goSoi);
+                sm.setPurchasePrice(new BigDecimal("12000000")); // Giá nhập: 12 củ/khối
+                supplierMaterialRepository.save(sm);
+            }
+
+            System.out.println("-> Đã tạo Nhà cung cấp và nối với Gỗ Sồi Nga thành công!");
         }
 
         // 5. TẠO PHIẾU KHO MẪU ĐỂ TEST API (BẢN NÂNG CẤP NHIỀU DATA)

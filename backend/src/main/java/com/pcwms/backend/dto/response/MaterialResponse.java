@@ -2,36 +2,40 @@ package com.pcwms.backend.dto.response;
 
 import com.pcwms.backend.entity.Material;
 import lombok.Data;
+import java.util.stream.Collectors;
 
 @Data
 public class MaterialResponse {
-    private Long id;
-    private String name;
+    // 6 trường chính xác theo UI của bạn yêu cầu:
     private String sku;
+    private String materialName;
     private String unit;
-    private Integer currentStock;
+    private String supplier; // 👉 Thêm mới để hứng tên Nhà cung cấp
     private Integer minStockLevel;
-
-    // 👉 1. Khai báo thêm biến description
     private String description;
 
-    // 👉 Tự động tính toán để Frontend hiện màu đỏ nếu true
+    // (Giữ lại các trường này nếu sau này Frontend cần dùng để tính toán)
+    private Long id;
+    private Integer currentStock;
     private boolean isLowStock;
 
     public MaterialResponse(Material m) {
         this.id = m.getId();
-        this.name = m.getName();
         this.sku = m.getSku();
+        this.materialName = m.getName(); // Đổi tên biến cho sát UI
         this.unit = m.getUnit();
-
-        // 👉 BẢO VỆ DỮ LIỆU: Đề phòng DB có giá trị null, ta ép về 0 để không bị lỗi
-        this.currentStock = m.getCurrentStock() != null ? m.getCurrentStock() : 0;
         this.minStockLevel = m.getMinStockLevel() != null ? m.getMinStockLevel() : 0;
-
-        // 👉 2. Map giá trị description từ Entity sang DTO
         this.description = m.getDescription();
-
-        // Logic: Nếu tồn <= ngưỡng báo động thì đánh dấu là thấp (Dùng biến nội bộ this để an toàn)
+        this.currentStock = m.getCurrentStock() != null ? m.getCurrentStock() : 0;
         this.isLowStock = this.currentStock <= this.minStockLevel;
+
+        // 👉 Logic gom tên Nhà cung cấp thực tế từ Database
+        if (m.getSupplierMaterials() != null && !m.getSupplierMaterials().isEmpty()) {
+            this.supplier = m.getSupplierMaterials().stream()
+                    .map(sm -> sm.getSupplier().getName()) // Map chính xác tên biến của bạn luôn
+                    .collect(Collectors.joining(", "));
+        } else {
+            this.supplier = "Chưa có nhà cung cấp";
+        }
     }
 }

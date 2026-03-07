@@ -1,5 +1,6 @@
 package com.pcwms.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -27,4 +28,8 @@ public class Material {
     private String description;
 
     private Boolean active = true; // Trạng thái sử dụng
+
+    @OneToMany(mappedBy = "material")
+    @JsonIgnore
+    private List<SupplierMaterial> supplierMaterials;
 }
