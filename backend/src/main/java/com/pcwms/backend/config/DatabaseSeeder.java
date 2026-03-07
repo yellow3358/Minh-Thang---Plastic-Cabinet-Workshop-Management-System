@@ -25,7 +25,6 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Autowired
     private MaterialRepository materialRepository;
 
-    // 👉 BƠM THÊM 2 REPO MỚI
     @Autowired
     private CustomerRepository customerRepository;
 
@@ -42,7 +41,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         System.out.println("=== BẮT ĐẦU KIỂM TRA & TẠO DỮ LIỆU MẪU ===");
 
-        // 1. TẠO DANH SÁCH QUYỀN (ROLES) - Đã xóa ROLE_CUSTOMER
+        // 1. TẠO DANH SÁCH QUYỀN (ROLES)
         List<String> roles = List.of(
                 "ROLE_ADMIN", "ROLE_DIRECTOR", "ROLE_SALES_MANAGER",
                 "ROLE_SALES_STAFF", "ROLE_WAREHOUSE_MANAGER",
@@ -79,23 +78,57 @@ public class DatabaseSeeder implements CommandLineRunner {
             System.out.println("-> Đã tạo 2 Khách hàng CRM mẫu.");
         }
 
-        // 4. TẠO VẬT TƯ & THÀNH PHẨM MẪU ĐỂ TEST KHO
+        // 4. 👉 CẬP NHẬT: TẠO VẬT TƯ & THÀNH PHẨM (Bơm nhiều Data để test cảnh báo)
         if (materialRepository.count() == 0) {
+            // Nhóm 1: Vật tư dồi dào (An toàn - Xanh)
             Material m1 = new Material();
             m1.setName("Gỗ Sồi Nga");
+            m1.setSku("MAT-WOOD-001");
             m1.setUnit("Khối");
             m1.setMinStockLevel(50);
-            m1.setCurrentStock(0);
+            m1.setCurrentStock(500);
+            m1.setActive(true);
             materialRepository.save(m1);
 
             Material m2 = new Material();
             m2.setName("Đinh ốc 5 phân");
+            m2.setSku("MAT-IRON-002");
             m2.setUnit("Hộp");
             m2.setMinStockLevel(100);
-            m2.setCurrentStock(0);
+            m2.setCurrentStock(200);
+            m2.setActive(true);
             materialRepository.save(m2);
 
-            System.out.println("-> Đã tạo 2 Nguyên vật liệu mẫu.");
+            // Nhóm 2: Vật tư sắp hết (Cảnh báo - Đỏ)
+            Material m3 = new Material();
+            m3.setName("Sơn phủ bóng PU");
+            m3.setSku("MAT-PAINT-003");
+            m3.setUnit("Lít");
+            m3.setMinStockLevel(50);
+            m3.setCurrentStock(15); // Tồn < Ngưỡng
+            m3.setActive(true);
+            materialRepository.save(m3);
+
+            Material m4 = new Material();
+            m4.setName("Keo dán gỗ chuyên dụng");
+            m4.setSku("MAT-GLUE-004");
+            m4.setUnit("Hũ");
+            m4.setMinStockLevel(20);
+            m4.setCurrentStock(5); // Tồn < Ngưỡng
+            m4.setActive(true);
+            materialRepository.save(m4);
+
+            // Nhóm 3: Vật tư ngừng sử dụng (Test Soft Delete - Ẩn)
+            Material m5 = new Material();
+            m5.setName("Vải nỉ cũ (Mẫu 2024)");
+            m5.setSku("MAT-FABRIC-005");
+            m5.setUnit("Cuộn");
+            m5.setMinStockLevel(0);
+            m5.setCurrentStock(0);
+            m5.setActive(false);
+            materialRepository.save(m5);
+
+            System.out.println("-> Đã tạo 5 Nguyên vật liệu mẫu (Đủ kịch bản Xanh/Đỏ/Ẩn).");
         }
 
         if (productRepository.count() == 0) {
@@ -103,7 +136,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             p1.setName("Bàn làm việc Gỗ Sồi");
             p1.setSku("SP-BAN-001");
             p1.setSellingPrice(new BigDecimal("1500000"));
-            p1.setCurrentStock(15); // Có sẵn 15 cái trong kho
+            p1.setCurrentStock(15);
             productRepository.save(p1);
 
             System.out.println("-> Đã tạo 1 Thành phẩm mẫu.");
@@ -111,7 +144,6 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         // 5. TẠO PHIẾU KHO MẪU ĐỂ TEST API (BẢN NÂNG CẤP NHIỀU DATA)
         if (warehouseTransactionRepository.count() == 0) {
-            // Lấy thủ kho và hàng hóa ra
             Staff thuKho = staffRepository.findAll().stream()
                     .filter(s -> s.getUser().getUsername().equals("warehouse_manager"))
                     .findFirst()
@@ -126,38 +158,35 @@ public class DatabaseSeeder implements CommandLineRunner {
                 WarehouseTransaction phieuNhap = new WarehouseTransaction();
                 phieuNhap.setType(TransactionType.IMPORT);
                 phieuNhap.setReferenceId("PO-SUPPLIER-999");
-                phieuNhap.setDate(java.time.LocalDateTime.now().minusDays(10)); // Nhập từ 10 ngày trước
+                phieuNhap.setDate(java.time.LocalDateTime.now().minusDays(10));
                 phieuNhap.setStaff(thuKho);
 
                 TransactionDetail chiTietNhap = new TransactionDetail();
                 chiTietNhap.setWarehouseTransaction(phieuNhap);
                 chiTietNhap.setMaterial(goSoi);
-                chiTietNhap.setQuantity(500); // Nhập hẳn 500 khối cho xôm
+                chiTietNhap.setQuantity(500);
 
                 phieuNhap.setDetails(List.of(chiTietNhap));
                 warehouseTransactionRepository.save(phieuNhap);
-
 
                 // --- 2. DÙNG VÒNG LẶP ĐẺ RA 15 PHIẾU XUẤT KHO ---
                 for (int i = 1; i <= 15; i++) {
                     WarehouseTransaction phieuXuat = new WarehouseTransaction();
                     phieuXuat.setType(TransactionType.EXPORT);
 
-                    // Logic trộn mã đơn để test Tìm kiếm: Cứ chia hết cho 3 thì là đơn VIP, còn lại đơn NORMAL
                     if (i % 3 == 0) {
                         phieuXuat.setReferenceId("SO-VIP-2026-00" + i);
                     } else {
                         phieuXuat.setReferenceId("SO-NORMAL-2026-00" + i);
                     }
 
-                    // Lùi ngày giờ từ từ để test tính năng Sắp xếp (Phiếu mới nhất hiện lên đầu)
                     phieuXuat.setDate(java.time.LocalDateTime.now().minusHours(i));
                     phieuXuat.setStaff(thuKho);
 
                     TransactionDetail chiTietXuat = new TransactionDetail();
                     chiTietXuat.setWarehouseTransaction(phieuXuat);
                     chiTietXuat.setProduct(banLamViec);
-                    chiTietXuat.setQuantity(i); // Số lượng xuất ngẫu nhiên theo biến i (1, 2, 3...)
+                    chiTietXuat.setQuantity(i);
 
                     phieuXuat.setDetails(List.of(chiTietXuat));
                     warehouseTransactionRepository.save(phieuXuat);
@@ -190,7 +219,6 @@ public class DatabaseSeeder implements CommandLineRunner {
         staffRepository.save(staff);
     }
 
-    // 👉 HÀM MỚI: TẠO KHÁCH HÀNG CRM
     private void createCustomer(String name, String email, String phone, String address, String taxCode, BigDecimal creditLimit) {
         Customer customer = new Customer();
         customer.setName(name);
