@@ -12,6 +12,9 @@ public class MaterialResponse {
     private Integer currentStock;
     private Integer minStockLevel;
 
+    // 👉 1. Khai báo thêm biến description
+    private String description;
+
     // 👉 Tự động tính toán để Frontend hiện màu đỏ nếu true
     private boolean isLowStock;
 
@@ -20,9 +23,15 @@ public class MaterialResponse {
         this.name = m.getName();
         this.sku = m.getSku();
         this.unit = m.getUnit();
-        this.currentStock = m.getCurrentStock();
-        this.minStockLevel = m.getMinStockLevel();
-        // Logic: Nếu tồn <= ngưỡng báo động thì đánh dấu là thấp
-        this.isLowStock = m.getCurrentStock() <= m.getMinStockLevel();
+
+        // 👉 BẢO VỆ DỮ LIỆU: Đề phòng DB có giá trị null, ta ép về 0 để không bị lỗi
+        this.currentStock = m.getCurrentStock() != null ? m.getCurrentStock() : 0;
+        this.minStockLevel = m.getMinStockLevel() != null ? m.getMinStockLevel() : 0;
+
+        // 👉 2. Map giá trị description từ Entity sang DTO
+        this.description = m.getDescription();
+
+        // Logic: Nếu tồn <= ngưỡng báo động thì đánh dấu là thấp (Dùng biến nội bộ this để an toàn)
+        this.isLowStock = this.currentStock <= this.minStockLevel;
     }
 }

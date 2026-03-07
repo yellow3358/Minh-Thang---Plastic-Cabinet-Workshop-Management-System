@@ -88,6 +88,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             m1.setMinStockLevel(50);
             m1.setCurrentStock(500);
             m1.setActive(true);
+            m1.setDescription("Gỗ tấm nguyên khối nhập khẩu, dùng để làm mặt bàn cao cấp.");
             materialRepository.save(m1);
 
             Material m2 = new Material();
@@ -97,6 +98,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             m2.setMinStockLevel(100);
             m2.setCurrentStock(200);
             m2.setActive(true);
+            m2.setDescription("Đinh ốc Lỏ.");
             materialRepository.save(m2);
 
             // Nhóm 2: Vật tư sắp hết (Cảnh báo - Đỏ)
@@ -107,6 +109,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             m3.setMinStockLevel(50);
             m3.setCurrentStock(15); // Tồn < Ngưỡng
             m3.setActive(true);
+            m3.setDescription("Sơn Trộm Của Sơn lại cuộc đời.");
             materialRepository.save(m3);
 
             Material m4 = new Material();
@@ -116,6 +119,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             m4.setMinStockLevel(20);
             m4.setCurrentStock(5); // Tồn < Ngưỡng
             m4.setActive(true);
+            m4.setDescription("Keo con chó.");
             materialRepository.save(m4);
 
             // Nhóm 3: Vật tư ngừng sử dụng (Test Soft Delete - Ẩn)
@@ -126,6 +130,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             m5.setMinStockLevel(0);
             m5.setCurrentStock(0);
             m5.setActive(false);
+            m5.setDescription("Vải nỉ đã ngừng sử dụng, chỉ để lại làm mẫu test xóa mềm.");
             materialRepository.save(m5);
 
             System.out.println("-> Đã tạo 5 Nguyên vật liệu mẫu (Đủ kịch bản Xanh/Đỏ/Ẩn).");

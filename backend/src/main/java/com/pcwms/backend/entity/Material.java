@@ -23,5 +23,8 @@ public class Material {
     // 👉 TRƯỜNG MỚI: Ngưỡng báo động
     private Integer minStockLevel = 0;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     private Boolean active = true; // Trạng thái sử dụng
 }

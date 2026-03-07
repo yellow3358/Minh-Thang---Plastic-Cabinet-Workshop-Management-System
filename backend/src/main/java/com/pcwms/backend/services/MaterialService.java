@@ -53,7 +53,7 @@ public class MaterialService {
         existingMaterial.setUnit(materialDetails.getUnit());
         existingMaterial.setSku(materialDetails.getSku()); // Cập nhật thêm mã SKU nếu có
         existingMaterial.setMinStockLevel(materialDetails.getMinStockLevel());
-
+        existingMaterial.setDescription(materialDetails.getDescription());
         return materialRepository.save(existingMaterial);
     }
 
