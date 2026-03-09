@@ -148,6 +148,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             p1.setSku("SP-BAN-001");
             p1.setSellingPrice(new BigDecimal("1500000"));
             p1.setCurrentStock(15);
+            p1.setUnit("Cái");
+            p1.setDescription("Bàn làm việc mặt gỗ sồi nguyên khối");
             productRepository.save(p1);
 
             System.out.println("-> Đã tạo 1 Thành phẩm mẫu.");

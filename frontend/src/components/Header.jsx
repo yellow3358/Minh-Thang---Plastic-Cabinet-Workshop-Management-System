@@ -1,7 +1,7 @@
 import "./Header.css";
 import { useAuth } from "../context/AuthContext";
 
-export const Header = ({ pageTitle, onLoginClick }) => {
+export const Header = ({ pageTitle }) => {
     const { user } = useAuth();
 
     return (
@@ -9,9 +9,8 @@ export const Header = ({ pageTitle, onLoginClick }) => {
             <div className="header-left">
                 <h1 className="header-title">{pageTitle}</h1>
             </div>
-
             <div className="header-right">
-                {user ? (
+                {user && (
                     <div className="header-user-info">
                         <div className="header-avatar">👤</div>
                         <div className="header-user-details">
@@ -19,10 +18,6 @@ export const Header = ({ pageTitle, onLoginClick }) => {
                             <span className="header-user-role">{user.role}</span>
                         </div>
                     </div>
-                ) : (
-                    <button className="btn btn--login" onClick={onLoginClick}>
-                        <span>→</span> Login
-                    </button>
                 )}
             </div>
         </header>

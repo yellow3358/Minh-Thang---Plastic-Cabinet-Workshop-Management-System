@@ -6,7 +6,8 @@ const NAV_ITEMS = [
     { id: "bom",       label: "Manage BOM",        icon: "" },
     { id: "plan",      label: "Plan Production",    icon: "" },
     { id: "workorder", label: "Execute Work Order", icon: "" },
-    { id: "material",  label: "Material",   icon: "" },
+    { id: "material",  label: "Control Material",   icon: "" },
+    { id: "products",   label: "Products",           icon: "" },
     { id: "monitor",   label: "Monitor Production", icon: "" },
 ];
 

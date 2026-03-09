@@ -10,9 +10,10 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const token = localStorage.getItem("token");
-    const saved  = localStorage.getItem("user");
-    return token && saved ? JSON.parse(saved) : null;
+    // Xóa session cũ khi khởi động app → bắt buộc đăng nhập lại
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    return null;
   });
   const [authLoading, setAuthLoading] = useState(false);
   const [authError,   setAuthError]   = useState(null);
@@ -28,6 +29,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user",  JSON.stringify(userInfo));
       setUser(userInfo);
+      // Báo cho các hook biết đã login → refetch data
+      window.dispatchEvent(new Event("auth-change"));
       return true;
     } catch (err) {
       const msg = err.response?.data?.message || "Sai tên đăng nhập hoặc mật khẩu";
@@ -42,6 +45,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     authService.logout();
     setUser(null);
+    window.dispatchEvent(new Event("auth-change"));
   };
 
   // ── Forgot password ────────────────────────────────────────

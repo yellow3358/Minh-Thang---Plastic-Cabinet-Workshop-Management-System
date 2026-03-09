@@ -18,8 +18,8 @@ export const LoginModal = ({ onClose }) => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter")  handleSubmit();
-    if (e.key === "Escape") onClose();
+    if (e.key === "Enter") handleSubmit();
+    // Bỏ Escape — không cho đóng login page
   };
 
   if (showForgot) {
@@ -41,11 +41,12 @@ export const LoginModal = ({ onClose }) => {
           <div className="lp-left__content">
             <h2 className="lp-left__heading">
               Hệ thống quản lý<br />
-              <span className="lp-left__accent">tủ nhựa</span><br />
-              <em className="lp-left__italic">Minh Thắng.</em>
+              <span className="lp-left__accent">tủ nhựa Minh Thắng</span><br />
+
             </h2>
             <p className="lp-left__desc">
-              Nền tảng số hóa quy trình sản xuất, kho hàng và giám sát tiến độ thời gian thực.
+              Nền tảng số hóa quy trình sản xuất, kho hàng và giám sát
+              tiến độ thời gian thực.
             </p>
           </div>
 
