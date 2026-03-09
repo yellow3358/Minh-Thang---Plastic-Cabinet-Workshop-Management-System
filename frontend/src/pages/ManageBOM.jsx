@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./ManageBOM.css";
 import { useBoms } from "../hooks/useBoms";
 import { useAuth } from "../context/AuthContext";
@@ -6,56 +6,88 @@ import { getStatusInfo } from "../services/bomService";
 import bomService from "../services/bomService";
 import api from "../services/api";
 
-// ─────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────
 const fmt = (val) =>
     val != null
         ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val)
         : "—";
 
 const calcMaterialCost = (detail) => {
-  // materialCost không có trong response → tính từ price * quantityRequired nếu có
   if (detail.price != null && detail.quantityRequired != null)
     return Number(detail.price) * Number(detail.quantityRequired);
   return null;
 };
 
 // ─────────────────────────────────────────────────────────────
+// Shared: Material rows editor (dùng cho cả Create và Edit)
+// ─────────────────────────────────────────────────────────────
+const MaterialRowsEditor = ({ rows, setRows, materials }) => {
+  const setRow = (idx, field, val) =>
+      setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, [field]: val } : r)));
+  const addRow    = () => setRows((p) => [...p, { materialId: "", quantityRequired: "" }]);
+  const removeRow = (idx) => setRows((p) => p.filter((_, i) => i !== idx));
+
+  return (
+      <div className="bom-detail-table">
+        <div className="bom-detail-header">
+          <span>Vật tư nguyên liệu</span>
+          <span>Số lượng</span>
+          <span>Đơn vị</span>
+          <span></span>
+        </div>
+        {rows.map((row, idx) => {
+          const mat = materials.find((m) => String(m.id) === String(row.materialId));
+          return (
+              <div className="bom-detail-row" key={idx}>
+                <select value={row.materialId} onChange={(e) => setRow(idx, "materialId", e.target.value)}>
+                  <option value="">-- Chọn vật tư --</option>
+                  {materials.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.materialName || m.name} ({m.sku})
+                      </option>
+                  ))}
+                </select>
+                <input
+                    type="number" min="0" step="0.0001"
+                    value={row.quantityRequired}
+                    onChange={(e) => setRow(idx, "quantityRequired", e.target.value)}
+                    placeholder="0"
+                />
+                <span className="bom-detail-unit">{mat?.unit || "—"}</span>
+                <button
+                    className="bom-remove-row"
+                    onClick={() => removeRow(idx)}
+                    disabled={rows.length === 1}
+                >✕</button>
+              </div>
+          );
+        })}
+        <button className="bom-add-row" onClick={addRow}>+ Thêm vật tư</button>
+      </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
 // Create BOM Modal
 // ─────────────────────────────────────────────────────────────
 const CreateBomModal = ({ onSave, onClose, saving }) => {
-  const [productId, setProductId]   = useState("");
-  const [version,   setVersion]     = useState("1.0");
-  const [rows,      setRows]        = useState([
-    { materialId: "", quantityRequired: "" },
-  ]);
-  const [products,  setProducts]    = useState([]);
-  const [materials, setMaterials]   = useState([]);
+  const [productId,   setProductId]   = useState("");
+  const [version,     setVersion]     = useState("1.0");
+  const [rows,        setRows]        = useState([{ materialId: "", quantityRequired: "" }]);
+  const [products,    setProducts]    = useState([]);
+  const [materials,   setMaterials]   = useState([]);
   const [loadingData, setLoadingData] = useState(true);
 
-  // Load products + materials khi mở modal
-  useState(() => {
+  useEffect(() => {
     (async () => {
       try {
-        const [pRes, mRes] = await Promise.all([
-          api.get("/products"),
-          api.get("/materials"),
-        ]);
-        const pBody = pRes.data;
-        const mBody = mRes.data;
-        setProducts(Array.isArray(pBody) ? pBody : pBody?.data ?? []);
-        setMaterials(Array.isArray(mBody) ? mBody : mBody?.data ?? []);
+        const [pRes, mRes] = await Promise.all([api.get("/products"), api.get("/materials")]);
+        setProducts(Array.isArray(pRes.data) ? pRes.data : (pRes.data?.data ?? []));
+        setMaterials(Array.isArray(mRes.data) ? mRes.data : (mRes.data?.data ?? []));
       } catch (e) {
         console.error("Lỗi tải dropdown:", e);
       } finally { setLoadingData(false); }
     })();
   }, []);
-
-  const setRow = (idx, field, val) =>
-      setRows((prev) => prev.map((r, i) => i === idx ? { ...r, [field]: val } : r));
-  const addRow    = () => setRows((p) => [...p, { materialId: "", quantityRequired: "" }]);
-  const removeRow = (idx) => setRows((p) => p.filter((_, i) => i !== idx));
 
   const handleSave = () => {
     const details = rows
@@ -73,15 +105,11 @@ const CreateBomModal = ({ onSave, onClose, saving }) => {
             <h3>Tạo BOM mới</h3>
             <button className="bom-modal__close" onClick={onClose}>✕</button>
           </div>
-
           {loadingData ? (
-              <div className="bom-modal__loading">
-                <div className="bom-spinner" /><span>Đang tải dữ liệu...</span>
-              </div>
+              <div className="bom-modal__loading"><div className="bom-spinner" /><span>Đang tải...</span></div>
           ) : (
               <>
                 <div className="bom-modal__body">
-                  {/* Product + Version */}
                   <div className="bom-form-row">
                     <div className="bom-form-group">
                       <label>Thành phẩm *</label>
@@ -94,63 +122,14 @@ const CreateBomModal = ({ onSave, onClose, saving }) => {
                     </div>
                     <div className="bom-form-group">
                       <label>Phiên bản *</label>
-                      <input
-                          value={version}
-                          onChange={(e) => setVersion(e.target.value)}
-                          placeholder="VD: 1.0"
-                      />
+                      <input value={version} onChange={(e) => setVersion(e.target.value)} placeholder="VD: 1.0" />
                     </div>
                   </div>
-
-                  {/* Material rows */}
                   <div className="bom-form-group">
-                    <label>Danh sách vật tư</label>
-                    <div className="bom-detail-table">
-                      <div className="bom-detail-header">
-                        <span>Vật tư nguyên liệu</span>
-                        <span>Số lượng</span>
-                        <span>Đơn vị</span>
-                        <span></span>
-                      </div>
-                      {rows.map((row, idx) => {
-                        const mat = materials.find((m) => String(m.id) === String(row.materialId));
-                        return (
-                            <div className="bom-detail-row" key={idx}>
-                              <select
-                                  value={row.materialId}
-                                  onChange={(e) => setRow(idx, "materialId", e.target.value)}
-                              >
-                                <option value="">-- Chọn vật tư --</option>
-                                {materials.map((m) => (
-                                    <option key={m.id} value={m.id}>
-                                      {m.materialName || m.name} ({m.sku})
-                                    </option>
-                                ))}
-                              </select>
-                              <input
-                                  type="number"
-                                  min="0"
-                                  step="0.0001"
-                                  value={row.quantityRequired}
-                                  onChange={(e) => setRow(idx, "quantityRequired", e.target.value)}
-                                  placeholder="0"
-                              />
-                              <span className="bom-detail-unit">
-                          {mat?.unit || "—"}
-                        </span>
-                              <button
-                                  className="bom-remove-row"
-                                  onClick={() => removeRow(idx)}
-                                  disabled={rows.length === 1}
-                              >✕</button>
-                            </div>
-                        );
-                      })}
-                      <button className="bom-add-row" onClick={addRow}>+ Thêm vật tư</button>
-                    </div>
+                    <label>Danh sách vật tư *</label>
+                    <MaterialRowsEditor rows={rows} setRows={setRows} materials={materials} />
                   </div>
                 </div>
-
                 <div className="bom-modal__footer">
                   <button className="btn btn--ghost" onClick={onClose}>Hủy</button>
                   <button className="btn btn--primary" onClick={handleSave} disabled={saving || !valid}>
@@ -165,34 +144,138 @@ const CreateBomModal = ({ onSave, onClose, saving }) => {
 };
 
 // ─────────────────────────────────────────────────────────────
-// BOM Detail View
+// Edit BOM Modal
+// BomUpdateRequest: { version, isActive, details:[{materialId, quantityRequired}] }
+// ─────────────────────────────────────────────────────────────
+const EditBomModal = ({ bom, onSave, onClose, saving }) => {
+  const [version,     setVersion]     = useState(bom.version || "");
+  const [isActive,    setIsActive]    = useState(bom.isActive ?? true);
+  const [rows,        setRows]        = useState(
+      bom.details?.length
+          ? bom.details.map((d) => ({ materialId: String(d.materialId), quantityRequired: String(d.quantityRequired) }))
+          : [{ materialId: "", quantityRequired: "" }]
+  );
+  const [materials,   setMaterials]   = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const mRes = await api.get("/materials");
+        setMaterials(Array.isArray(mRes.data) ? mRes.data : (mRes.data?.data ?? []));
+      } catch (e) {
+        console.error("Lỗi tải vật tư:", e);
+      } finally { setLoadingData(false); }
+    })();
+  }, []);
+
+  const handleSave = () => {
+    const details = rows
+        .filter((r) => r.materialId && r.quantityRequired)
+        .map((r) => ({ materialId: Number(r.materialId), quantityRequired: Number(r.quantityRequired) }));
+    // BomUpdateRequest: { version, isActive, details }
+    onSave({ version, isActive, details });
+  };
+
+  const valid = version && rows.some((r) => r.materialId && r.quantityRequired);
+
+  return (
+      <div className="bom-overlay" onClick={onClose}>
+        <div className="bom-modal bom-modal--lg" onClick={(e) => e.stopPropagation()}>
+          <div className="bom-modal__header">
+            <div>
+              <h3>Chỉnh sửa BOM</h3>
+              <span className="bom-modal__subtitle">{bom.productName} · v{bom.version}</span>
+            </div>
+            <button className="bom-modal__close" onClick={onClose}>✕</button>
+          </div>
+          {loadingData ? (
+              <div className="bom-modal__loading"><div className="bom-spinner" /><span>Đang tải...</span></div>
+          ) : (
+              <>
+                <div className="bom-modal__body">
+                  {/* Version + isActive */}
+                  <div className="bom-form-row">
+                    <div className="bom-form-group">
+                      <label>Phiên bản *</label>
+                      <input value={version} onChange={(e) => setVersion(e.target.value)} placeholder="VD: 1.0" />
+                    </div>
+                    <div className="bom-form-group">
+                      <label>Trạng thái</label>
+                      <select value={isActive ? "true" : "false"} onChange={(e) => setIsActive(e.target.value === "true")}>
+                        <option value="true">Đang hoạt động</option>
+                        <option value="false">Ngừng dùng</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Material rows */}
+                  <div className="bom-form-group">
+                    <label>Danh sách vật tư *</label>
+                    <MaterialRowsEditor rows={rows} setRows={setRows} materials={materials} />
+                  </div>
+
+                  {/* Note về isApproved */}
+                  <div className="bom-note">
+                    ℹ️ Sau khi chỉnh sửa, BOM sẽ cần được duyệt lại bởi Admin / Giám đốc.
+                  </div>
+                </div>
+                <div className="bom-modal__footer">
+                  <button className="btn btn--ghost" onClick={onClose}>Hủy</button>
+                  <button className="btn btn--primary" onClick={handleSave} disabled={saving || !valid}>
+                    {saving ? "Đang lưu..." : "Lưu thay đổi"}
+                  </button>
+                </div>
+              </>
+          )}
+        </div>
+      </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// BOM Detail
 // ─────────────────────────────────────────────────────────────
 const BomDetail = ({ bomId, onBack, onUpdated }) => {
   const { user } = useAuth();
-  const [bom,         setBom]         = useState(null);
-  const [loading,     setLoading]     = useState(true);
-  const [error,       setError]       = useState(null);
-  const [showEdit,    setShowEdit]    = useState(false);
-  const [saving,      setSaving]      = useState(false);
-  const [toast,       setToast]       = useState(null);
+  const [bom,      setBom]      = useState(null);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const [saving,   setSaving]   = useState(false);
+  const [toast,    setToast]    = useState(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  useState(() => {
+  useEffect(() => {
     (async () => {
       try {
         const data = await bomService.getById(bomId);
         setBom(data);
-      } catch (e) {
+      } catch {
         setError("Không thể tải chi tiết BOM");
       } finally { setLoading(false); }
     })();
   }, [bomId]);
 
-  // Tính Total BOM Cost = sum(price * qty) nếu có price
+  const handleEdit = async (payload) => {
+    setSaving(true);
+    try {
+      await bomService.update(bomId, payload);
+      // Reload lại detail sau khi update
+      const fresh = await bomService.getById(bomId);
+      setBom(fresh);
+      setShowEdit(false);
+      showToast("Cập nhật BOM thành công!");
+      if (onUpdated) onUpdated();
+    } catch (e) {
+      showToast(e.response?.data?.message || "Có lỗi xảy ra", "error");
+    } finally { setSaving(false); }
+  };
+
   const totalCost = bom?.details?.reduce((sum, d) => {
     const c = calcMaterialCost(d);
     return c != null ? sum + c : sum;
@@ -211,16 +294,18 @@ const BomDetail = ({ bomId, onBack, onUpdated }) => {
             </svg>
             Quay lại danh sách
           </button>
+          {user && bom && (
+              <button className="btn btn--primary" onClick={() => setShowEdit(true)} disabled={saving}>
+                ✏️ Chỉnh sửa BOM
+              </button>
+          )}
         </div>
 
-        {loading && (
-            <div className="bom-state"><div className="bom-spinner" /><span>Đang tải...</span></div>
-        )}
-        {error && <div className="bom-state bom-state--error">⚠️ {error}</div>}
+        {loading && <div className="bom-state"><div className="bom-spinner" /><span>Đang tải...</span></div>}
+        {error   && <div className="bom-state bom-state--error">⚠️ {error}</div>}
 
         {bom && !loading && (
             <>
-              {/* Header card */}
               <div className="bom-header-card">
                 <div className="bom-header-card__left">
                   <div className="bom-avatar">📋</div>
@@ -237,7 +322,6 @@ const BomDetail = ({ bomId, onBack, onUpdated }) => {
                 </div>
               </div>
 
-              {/* Summary cards */}
               <div className="bom-summary-row">
                 <div className="bom-summary-card">
                   <span className="bom-summary-label">Số loại vật tư</span>
@@ -259,7 +343,6 @@ const BomDetail = ({ bomId, onBack, onUpdated }) => {
                 </div>
               </div>
 
-              {/* Material table */}
               <div className="bom-card">
                 <div className="bom-card__header">
                   <span className="bom-card__title">🔩 Thành phần vật tư</span>
@@ -276,10 +359,10 @@ const BomDetail = ({ bomId, onBack, onUpdated }) => {
                   </tr>
                   </thead>
                   <tbody>
-                  {bom.details?.length === 0 ? (
+                  {!bom.details?.length ? (
                       <tr><td colSpan={6} className="bom-empty">Chưa có vật tư nào</td></tr>
                   ) : (
-                      bom.details?.map((d, idx) => {
+                      bom.details.map((d, idx) => {
                         const cost = calcMaterialCost(d);
                         return (
                             <tr key={d.id}>
@@ -306,6 +389,15 @@ const BomDetail = ({ bomId, onBack, onUpdated }) => {
               </div>
             </>
         )}
+
+        {showEdit && bom && (
+            <EditBomModal
+                bom={bom}
+                onSave={handleEdit}
+                onClose={() => setShowEdit(false)}
+                saving={saving}
+            />
+        )}
       </div>
   );
 };
@@ -313,14 +405,14 @@ const BomDetail = ({ bomId, onBack, onUpdated }) => {
 // ─────────────────────────────────────────────────────────────
 // BOM List
 // ─────────────────────────────────────────────────────────────
-export const ManageBOM = ({ onSelectBom, selectedBomId, onBack, onUpdated }) => {
+export const ManageBOM = () => {
   const { boms, loading, error, refetch, create } = useBoms();
   const { user } = useAuth();
-  const [search,   setSearch]   = useState("");
+  const [search,     setSearch]     = useState("");
   const [showCreate, setShowCreate] = useState(false);
-  const [saving,   setSaving]   = useState(false);
-  const [toast,    setToast]    = useState(null);
-  const [detailId, setDetailId] = useState(null);
+  const [saving,     setSaving]     = useState(false);
+  const [toast,      setToast]      = useState(null);
+  const [detailId,   setDetailId]   = useState(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -343,13 +435,12 @@ export const ManageBOM = ({ onSelectBom, selectedBomId, onBack, onUpdated }) => 
     } finally { setSaving(false); }
   };
 
-  // Nếu đang xem detail
   if (detailId) {
     return (
         <BomDetail
             bomId={detailId}
-            onBack={() => setDetailId(null)}
-            onUpdated={() => { setDetailId(null); refetch(); }}
+            onBack={() => { setDetailId(null); refetch(); }}
+            onUpdated={() => refetch()}
         />
     );
   }
@@ -358,7 +449,6 @@ export const ManageBOM = ({ onSelectBom, selectedBomId, onBack, onUpdated }) => 
       <div className="bom-page">
         {toast && <div className={`bom-toast bom-toast--${toast.type}`}>{toast.msg}</div>}
 
-        {/* Toolbar */}
         <div className="bom-bar">
           <div className="bom-bar__left">
             <div className="bom-search">
@@ -381,17 +471,14 @@ export const ManageBOM = ({ onSelectBom, selectedBomId, onBack, onUpdated }) => 
           </div>
         </div>
 
-        {loading && (
-            <div className="bom-state"><div className="bom-spinner"/><span>Đang tải...</span></div>
-        )}
+        {loading && <div className="bom-state"><div className="bom-spinner"/><span>Đang tải...</span></div>}
         {error && !loading && (
             <div className="bom-state bom-state--error">
               <span style={{ fontSize: 36 }}>⚠️</span>
               <span style={{ fontWeight: 500 }}>{error}</span>
               {error.includes("đăng nhập")
                   ? <span style={{ fontSize: 13 }}>Vui lòng đăng nhập lại</span>
-                  : <button className="btn btn--ghost" onClick={refetch}>🔄 Thử lại</button>
-              }
+                  : <button className="btn btn--ghost" onClick={refetch}>🔄 Thử lại</button>}
             </div>
         )}
 

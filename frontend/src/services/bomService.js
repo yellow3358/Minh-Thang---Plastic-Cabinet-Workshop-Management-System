@@ -29,6 +29,10 @@ const bomService = {
     // POST body: { productId, version, details: [{materialId, quantityRequired}] }
     create: (payload) =>
         api.post(BASE, payload).then((res) => res.data?.data ?? res.data),
+
+    // PUT body: { version, isActive, details: [{materialId, quantityRequired}] }
+    update: (id, payload) =>
+        api.put(`${BASE}/${id}`, payload).then((res) => res.data?.data ?? res.data),
 };
 
 export default bomService;

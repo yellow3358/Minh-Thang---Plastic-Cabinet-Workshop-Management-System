@@ -125,3 +125,20 @@
 
 @media (max-width:768px) { .bom-summary-row { grid-template-columns:1fr 1fr; } }
 @media (max-width:480px) { .bom-summary-row { grid-template-columns:1fr; } }
+
+/* Edit modal extras */
+.bom-modal__subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    display: block;
+}
+
+.bom-note {
+    background: rgba(234,179,8,.08);
+    border: 1px solid rgba(234,179,8,.25);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #92400e;
+}
