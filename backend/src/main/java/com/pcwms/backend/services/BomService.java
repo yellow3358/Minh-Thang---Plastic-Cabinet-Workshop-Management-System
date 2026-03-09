@@ -3,6 +3,8 @@ package com.pcwms.backend.services;
 // 👉 GOM GỌN CÁC IMPORT VÀO ĐÂY CHO ĐẸP MẮT
 import com.pcwms.backend.dto.request.BomCreateRequest;
 import com.pcwms.backend.dto.request.BomDetailRequest;
+import com.pcwms.backend.dto.request.BomUpdateRequest;
+import com.pcwms.backend.dto.response.BomDetailViewResponse;
 import com.pcwms.backend.dto.response.BomResponse;
 import com.pcwms.backend.entity.BillOfMaterial;
 import com.pcwms.backend.entity.BillOfMaterialDetail;
@@ -96,5 +98,59 @@ public class BomService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Định mức (BOM) với ID: " + id));
 
         return new com.pcwms.backend.dto.response.BomDetailViewResponse(bom);
+    }
+
+    @Transactional
+    public BomDetailViewResponse updateBom(Long id, BomUpdateRequest request) {
+
+        // 1. Tìm BOM xem có tồn tại không
+        BillOfMaterial bom = bomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Định mức (BOM) với ID: " + id));
+
+        // 2. 🚨 LUẬT THÉP: Đã duyệt thì cấm sửa!
+        if (bom.getIsApproved()) {
+            throw new RuntimeException("Định mức này đã được duyệt, KHÔNG THỂ chỉnh sửa! Vui lòng Hủy duyệt trước.");
+        }
+
+        // 3. Cập nhật thông tin Header
+        bom.setVersion(request.getVersion());
+        if (request.getIsActive() != null) {
+            bom.setIsActive(request.getIsActive());
+        }
+
+        // 4. Validate list vật tư mới
+        if (request.getDetails() == null || request.getDetails().isEmpty()) {
+            throw new RuntimeException("Định mức phải có ít nhất 1 nguyên vật liệu!");
+        }
+
+        // 5. Xóa sạch list vật tư cũ trong bộ nhớ
+        bom.getBomDetails().clear();
+
+        Set<Long> materialIds = new HashSet<>();
+
+        // 6. Lặp qua list mới và bơm lại vào Cha
+        for (BomDetailRequest detailReq : request.getDetails()) {
+
+            if (!materialIds.add(detailReq.getMaterialId())) {
+                throw new RuntimeException("Vật tư có ID " + detailReq.getMaterialId() + " bị trùng lặp!");
+            }
+
+            if (detailReq.getQuantityRequired() == null || detailReq.getQuantityRequired().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new RuntimeException("Số lượng vật tư phải lớn hơn 0!");
+            }
+
+            Material material = materialRepository.findById(detailReq.getMaterialId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy Vật tư với ID: " + detailReq.getMaterialId()));
+
+            BillOfMaterialDetail detail = new BillOfMaterialDetail();
+            detail.setMaterial(material);
+            detail.setQuantityRequired(detailReq.getQuantityRequired());
+
+            bom.addBomDetail(detail);
+        }
+
+        // 7. Lưu và trả về DTO
+        BillOfMaterial updatedBom = bomRepository.save(bom);
+        return new BomDetailViewResponse(updatedBom);
     }
 }

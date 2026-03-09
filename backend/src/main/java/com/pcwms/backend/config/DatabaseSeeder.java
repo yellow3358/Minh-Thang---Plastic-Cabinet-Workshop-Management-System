@@ -185,9 +185,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             System.out.println("-> Đã tạo Nhà cung cấp và nối với Gỗ Sồi Nga thành công!");
         }
 
-        // 👉 4.2 TẠO ĐỊNH MỨC SẢN XUẤT (BOM) MẪU
+// 👉 4.2 TẠO ĐỊNH MỨC SẢN XUẤT (BOM) MẪU
         if (billOfMaterialRepository.count() == 0) {
-            // Lấy Thành phẩm và Vật tư từ Database lên
             Product banLamViec = productRepository.findAll().stream()
                     .filter(p -> p.getSku().equals("SP-BAN-001")).findFirst().orElse(null);
 
@@ -201,33 +200,46 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .filter(m -> m.getSku().equals("MAT-GLUE-004")).findFirst().orElse(null);
 
             if (banLamViec != null && goSoi != null && dinhOc != null && keoDan != null) {
+
+                // ==========================================
+                // 🛑 BOM SỐ 1: ĐÃ DUYỆT (Dùng để test chặn Edit)
+                // ==========================================
                 BillOfMaterial bom1 = new BillOfMaterial();
                 bom1.setProduct(banLamViec);
                 bom1.setVersion("1.0");
-                bom1.setIsApproved(true);
+                bom1.setIsApproved(true); // Đã duyệt
                 bom1.setIsActive(true);
 
-                // 0.5 Khối Gỗ
                 BillOfMaterialDetail detail1 = new BillOfMaterialDetail();
                 detail1.setMaterial(goSoi);
                 detail1.setQuantityRequired(new BigDecimal("0.5000"));
                 bom1.addBomDetail(detail1);
 
-                // 20 Hộp đinh
                 BillOfMaterialDetail detail2 = new BillOfMaterialDetail();
                 detail2.setMaterial(dinhOc);
                 detail2.setQuantityRequired(new BigDecimal("20.0000"));
                 bom1.addBomDetail(detail2);
 
-                // 2 Hũ keo dán
-                BillOfMaterialDetail detail3 = new BillOfMaterialDetail();
-                detail3.setMaterial(keoDan);
-                detail3.setQuantityRequired(new BigDecimal("2.0000"));
-                bom1.addBomDetail(detail3);
-
-                // Lưu BOM xuống DB
                 billOfMaterialRepository.save(bom1);
-                System.out.println("-> Đã tạo 1 Định mức (BOM) mẫu cho Bàn Gỗ Sồi thành công!");
+
+                // ==========================================
+                // 🟢 BOM SỐ 2: BẢN NHÁP (Dùng để test Edit thành công và Approve)
+                // ==========================================
+                BillOfMaterial bom2 = new BillOfMaterial();
+                bom2.setProduct(banLamViec);
+                bom2.setVersion("2.0-DRAFT");
+                bom2.setIsApproved(false); // 👉 CHƯA DUYỆT (Được phép Edit)
+                bom2.setIsActive(true);
+
+                // Bản nháp này mới chỉ có Gỗ, chưa có Đinh và Keo
+                BillOfMaterialDetail detail2_1 = new BillOfMaterialDetail();
+                detail2_1.setMaterial(goSoi);
+                detail2_1.setQuantityRequired(new BigDecimal("0.4500")); // Thử giảm gỗ xuống
+                bom2.addBomDetail(detail2_1);
+
+                billOfMaterialRepository.save(bom2);
+
+                System.out.println("-> Đã tạo 2 Định mức (1 Đã duyệt, 1 Bản nháp) cho Bàn Gỗ Sồi thành công!");
             }
         }
 
