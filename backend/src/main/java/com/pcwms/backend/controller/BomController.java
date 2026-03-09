@@ -1,5 +1,6 @@
 package com.pcwms.backend.controller;
 
+import com.pcwms.backend.dto.request.BomUpdateRequest;
 import com.pcwms.backend.dto.response.BomResponse;
 import com.pcwms.backend.dto.response.ResponseObject;
 import com.pcwms.backend.services.BomService;
@@ -38,6 +39,17 @@ public class BomController {
         BomResponse newBom = bomService.createBom(request);
         return ResponseEntity.ok(
                 new ResponseObject("SUCCESS", "Tạo Định mức (BOM) thành công", newBom)
+        );
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('PRODUCTION_MANAGER') or hasRole('ADMIN') or hasRole('DIRECTOR')")
+    public ResponseEntity<ResponseObject> updateBom(
+            @PathVariable Long id,
+            @RequestBody BomUpdateRequest request) {
+
+        return ResponseEntity.ok(
+                new ResponseObject("SUCCESS", "Cập nhật Định mức (BOM) thành công", bomService.updateBom(id, request))
         );
     }
 
