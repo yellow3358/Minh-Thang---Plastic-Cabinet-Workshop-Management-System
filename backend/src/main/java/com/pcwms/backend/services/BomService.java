@@ -90,4 +90,11 @@ public class BomService {
         // 6. Trả về cho FE
         return new BomResponse(savedBom);
     }
+
+    public com.pcwms.backend.dto.response.BomDetailViewResponse getBomById(Long id) {
+        BillOfMaterial bom = bomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Định mức (BOM) với ID: " + id));
+
+        return new com.pcwms.backend.dto.response.BomDetailViewResponse(bom);
+    }
 }

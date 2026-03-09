@@ -24,6 +24,13 @@ public class BomController {
                 new ResponseObject("SUCCESS", "Lấy danh sách Định mức (BOM) thành công", bomService.getAllBoms())
         );
     }
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('PRODUCTION_MANAGER') or hasRole('ADMIN') or hasRole('DIRECTOR')")
+    public ResponseEntity<ResponseObject> getBomById(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                new ResponseObject("SUCCESS", "Lấy chi tiết Định mức thành công", bomService.getBomById(id))
+        );
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('PRODUCTION_MANAGER') or hasRole('ADMIN') or hasRole('DIRECTOR')")
@@ -33,4 +40,6 @@ public class BomController {
                 new ResponseObject("SUCCESS", "Tạo Định mức (BOM) thành công", newBom)
         );
     }
+
+
 }
