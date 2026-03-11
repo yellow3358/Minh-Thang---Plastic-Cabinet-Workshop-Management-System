@@ -3,6 +3,7 @@ package com.pcwms.backend.controller; // Nhớ đổi đúng package của bạn
 import com.pcwms.backend.dto.request.UpdateProfileRequest;
 import com.pcwms.backend.dto.response.ResponseObject;
 import com.pcwms.backend.dto.response.UserProfileResponse;
+import com.pcwms.backend.dto.response.UserResponseDTO;
 import com.pcwms.backend.entity.User;
 import com.pcwms.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class UserController {
         }
     }
 
+    // tao nguoi dung/staff
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('DIRECTOR')")
     public ResponseEntity<?> createUser(@RequestBody User user) {
@@ -49,6 +51,7 @@ public class UserController {
         );
     }
 
+    // cap nhat thong tin nguoi dung/staff
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('DIRECTOR')")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
@@ -57,6 +60,7 @@ public class UserController {
         );
     }
 
+    // xoa nguoi dung/staff
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('DIRECTOR')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
@@ -64,5 +68,19 @@ public class UserController {
         return ResponseEntity.ok(
                 new ResponseObject("SUCCESS", "Xóa user thành công", null)
         );
+    }
+
+    // khoa tai khoan nguoi dung/staff
+    @PutMapping("/{id}/lock")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DIRECTOR')")
+    public ResponseEntity<UserResponseDTO> lockUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.lockUser(id));
+    }
+
+    // mo khoa tai khoan nguoi dung/staff
+    @PutMapping("/{id}/unlock")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DIRECTOR')")
+    public ResponseEntity<UserResponseDTO> unlockUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.unlockUser(id));
     }
 }
