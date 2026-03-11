@@ -22,6 +22,7 @@ public class UserController {
 
     // 1. API GỬI DATA CHO FRONTEND HIỂN THỊ LÊN FORM (GET)
     @GetMapping("/profile")
+    @PreAuthorize("isAuthenticated()") // Bất kỳ ai đã đăng nhập đều có thể xem thông tin cá nhân của mình
     public ResponseEntity<?> getProfile(Principal principal) {
         try {
             UserProfileResponse profile = userService.getMyProfile(principal.getName());
@@ -33,6 +34,7 @@ public class UserController {
 
     // 2. API NHẬN DATA TỪ FRONTEND ĐỂ LƯU XUỐNG DB (PUT)
     @PutMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateProfile(@RequestBody UpdateProfileRequest request, Principal principal) {
         try {
             userService.updateMyProfile(principal.getName(), request);
