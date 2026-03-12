@@ -101,6 +101,7 @@ public class UserService {
 
     public void deleteUser(Long id) {
         User user = getUserById(id);
+        user.setIsActive(false);
         userRepository.delete(user);
     }
 
