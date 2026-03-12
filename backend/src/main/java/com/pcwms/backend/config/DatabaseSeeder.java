@@ -154,6 +154,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             p1.setCurrentStock(15);
             p1.setUnit("Cái");
             p1.setDescription("Bàn làm việc mặt gỗ sồi nguyên khối");
+            p1.setImageUrl("https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?q=80&w=800&auto=format&fit=crop");
             productRepository.save(p1);
 
             System.out.println("-> Đã tạo 1 Thành phẩm mẫu.");

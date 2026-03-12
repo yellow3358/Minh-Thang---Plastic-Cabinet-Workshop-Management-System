@@ -24,7 +24,7 @@ const EditForm = ({ initial, onSave, onClose, loading }) => {
     return (
         <div className="md-overlay" onClick={onClose}>
             <div className="md-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="md-modal__header">
+                <div className="md-modal__header">n
                     <h3>Chỉnh sửa vật liệu</h3>
                     <button className="md-modal__close" onClick={onClose}>✕</button>
                 </div>
