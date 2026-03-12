@@ -116,32 +116,23 @@
 }
 
 /* ── Image Upload ─────────────────────────────────────────── */
+.pd-img-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
 .pd-img-box {
     width: 96px;
     height: 96px;
     border-radius: var(--radius-md);
-    border: 2px dashed var(--border);
+    border: 1px solid var(--border);
     overflow: hidden;
     position: relative;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: border-color var(--transition), box-shadow var(--transition);
     background: var(--bg-base);
-}
-
-.pd-img-box:hover:not(.pd-img-box--readonly) {
-    border-color: var(--border-accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.pd-img-box--drag {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-    background: var(--accent-glow);
-}
-
-.pd-img-box--readonly {
-    cursor: default;
+    flex-shrink: 0;
 }
 
 .pd-img-preview {
@@ -149,27 +140,6 @@
     height: 100%;
     object-fit: cover;
     display: block;
-}
-
-/* Hover overlay khi đã có ảnh */
-.pd-img-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,.55);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    opacity: 0;
-    transition: opacity var(--transition);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 500;
-}
-
-.pd-img-box:hover .pd-img-overlay {
-    opacity: 1;
 }
 
 /* Placeholder khi chưa có ảnh */
@@ -189,11 +159,61 @@
 .pd-img-placeholder__text {
     font-size: 10.5px;
     font-weight: 500;
-    line-height: 1.3;
     color: var(--text-secondary);
+    line-height: 1.3;
 }
 
-.pd-img-placeholder__hint {
-    font-size: 9.5px;
-    color: var(--text-muted);
+/* Loading overlay */
+.pd-img-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 500;
 }
+
+/* Upload button bên dưới ảnh */
+.pd-img-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+
+.pd-img-upload-btn:hover:not(:disabled) {
+    background: var(--accent-glow);
+    border-color: var(--border-accent);
+    color: var(--accent);
+}
+
+.pd-img-upload-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* Upload spinner inside image box */
+.pd-img-overlay { opacity: 1 !important; } /* always show when loading */
+.pd-img-spinner {
+    width: 24px; height: 24px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

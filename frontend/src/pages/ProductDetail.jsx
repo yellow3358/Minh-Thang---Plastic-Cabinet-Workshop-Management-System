@@ -17,76 +17,85 @@ const formatPrice = (val) =>
         : "—";
 
 // ── Image Upload ───────────────────────────────────────────────
-const ProductImage = ({ image, onImageChange, canWrite }) => {
-    const inputRef  = useRef(null);
-    const [dragging, setDragging] = useState(false);
+const ProductImage = ({ image, onImageChange, canWrite, loading }) => {
+    const inputRef = useRef(null);
 
     const handleFile = (file) => {
         if (!file || !file.type.startsWith("image/")) return;
+
         if (file.size > 5 * 1024 * 1024) {
             alert("Ảnh quá lớn! Vui lòng chọn ảnh dưới 5MB.");
             return;
         }
-        const reader = new FileReader();
-        reader.onload = (e) => onImageChange(e.target.result);
-        reader.readAsDataURL(file);
-    };
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        setDragging(false);
-        if (!canWrite) return;
-        handleFile(e.dataTransfer.files[0]);
+        const previewUrl = URL.createObjectURL(file);
+        onImageChange(file, previewUrl);
     };
 
     return (
-        <div
-            className={`pd-img-box${dragging ? " pd-img-box--drag" : ""}${!canWrite ? " pd-img-box--readonly" : ""}`}
-            onClick={() => canWrite && inputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); if (canWrite) setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-        >
-            {image ? (
-                <>
+        <div className="pd-img-wrap">
+            {/* Ảnh lớn */}
+            <div className="pd-img-box">
+                {image ? (
                     <img src={image} alt="product" className="pd-img-preview" />
-                    {canWrite && (
-                        <div className="pd-img-overlay">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="17 8 12 3 7 8"/>
-                                <line x1="12" y1="3" x2="12" y2="15"/>
-                            </svg>
-                            <span>Thay ảnh</span>
-                        </div>
-                    )}
-                </>
-            ) : (
-                <div className="pd-img-placeholder">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                    {canWrite ? (
-                        <>
-                            <span className="pd-img-placeholder__text">Nhấn hoặc kéo thả ảnh</span>
-                            <span className="pd-img-placeholder__hint">PNG, JPG tối đa 5MB</span>
-                        </>
-                    ) : (
+                ) : (
+                    <div className="pd-img-placeholder">
+                        <svg
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                        >
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                        </svg>
                         <span className="pd-img-placeholder__text">Chưa có ảnh</span>
-                    )}
-                </div>
-            )}
+                    </div>
+                )}
+
+                {loading && (
+                    <div className="pd-img-loading">
+                        <div className="pd-img-spinner" />
+                        <span>Đang upload...</span>
+                    </div>
+                )}
+            </div>
+
+            {/* Nút upload */}
             {canWrite && (
-                <input
-                    ref={inputRef}
-                    type="file"
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    onChange={(e) => handleFile(e.target.files[0])}
-                />
+                <button
+                    className="pd-img-upload-btn"
+                    onClick={() => inputRef.current?.click()}
+                    disabled={loading}
+                >
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                    >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+
+                    {loading ? "Đang upload..." : image ? "Thay ảnh" : "Upload ảnh"}
+                </button>
             )}
+
+            {/* Input hidden */}
+            <input
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => handleFile(e.target.files[0])}
+            />
         </div>
     );
 };
@@ -226,10 +235,28 @@ export const ProductDetail = ({ product: initial, onBack, onUpdated }) => {
         } finally { setActionLoading(false); }
     };
 
-    const handleImageChange = (base64) => {
-        setImage(base64);
-        // TODO: Khi backend có endpoint upload ảnh, gọi API tại đây
-        // await productService.uploadImage(product.id, base64);
+    const handleImageChange = async (file, previewUrl) => {
+        setImage(previewUrl); // Hiện preview ngay
+        setActionLoading(true);
+        try {
+            // Upload file lên server
+            const formData = new FormData();
+            formData.append("file", file);
+            const res = await import("../services/api").then(m =>
+                m.default.post("/files/upload/products", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                })
+            );
+            const imageUrl = res.data?.data ?? res.data;
+            // Lưu URL vào product
+            const payload = { ...product, imageUrl };
+            await productService.update(product.id, payload);
+            setProduct(payload);
+            showToast("Upload ảnh thành công!");
+        } catch (e) {
+            showToast(e.response?.data?.message || "Upload thất bại", "error");
+            setImage(product.imageUrl || null); // Rollback nếu lỗi
+        } finally { setActionLoading(false); }
     };
 
     return (
@@ -254,7 +281,7 @@ export const ProductDetail = ({ product: initial, onBack, onUpdated }) => {
             {/* Header card */}
             <div className="pd-header-card">
                 <div className="pd-header-card__left">
-                    <ProductImage image={image} onImageChange={handleImageChange} canWrite={canWrite} />
+                    <ProductImage image={image} onImageChange={handleImageChange} canWrite={canWrite} loading={actionLoading} />
                     <div>
                         <h1 className="pd-name">{product.name}</h1>
                         <span className="pd-sku-badge">{product.sku}</span>
