@@ -1,5 +1,6 @@
 package com.pcwms.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,8 +15,9 @@ public class Staff {
     private Long id;
 
     //Nối với bảng User (khi xóa User thì cũng xóa bảng này (cascade)
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore // 👉 GẮN VÀO ĐÂY: Để khi gọi Staff nó không gọi ngược lại User
     private User user;
 
     @Column(name= "fullname", nullable = false)
@@ -27,6 +29,11 @@ public class Staff {
     @Column(name= "empoyee_id",unique = true)
     private String employeeId; // Mã nhân viên duy nhất
 
+    @Column(name= "phone_number")
+    private String phoneNumber;
+
     @OneToMany(mappedBy = "staff")
     private List<WarehouseTransaction> warehouseTransactions;
+
+
 }

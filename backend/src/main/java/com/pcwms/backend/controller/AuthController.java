@@ -1,6 +1,8 @@
 package com.pcwms.backend.controller;
 
+import com.pcwms.backend.dto.request.ForgotPasswordRequest;
 import com.pcwms.backend.dto.request.LoginRequest;
+import com.pcwms.backend.dto.request.ResetPasswordRequest;
 import com.pcwms.backend.dto.request.SignupRequest;
 import com.pcwms.backend.dto.response.JwtResponse;
 import com.pcwms.backend.dto.response.ResponseObject;
@@ -8,6 +10,7 @@ import com.pcwms.backend.entity.Role;
 import com.pcwms.backend.entity.User;
 import com.pcwms.backend.repository.RoleRepository;
 import com.pcwms.backend.repository.UserRepository;
+import com.pcwms.backend.security.services.AuthService;
 import com.pcwms.backend.security.services.UserDetailsImpl;
 import com.pcwms.backend.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,9 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    @Autowired
+    AuthService authService;
 
     // API Đăng nhập
     @PostMapping("/login")
@@ -71,32 +77,37 @@ public class AuthController {
         }
     }
 
-
-    // API Đăng ký (Chỉ dành cho Khách hàng tự đăng ký)
-    @PostMapping("/signup")
-    public ResponseEntity<ResponseObject> registerUser(@RequestBody SignupRequest signUpRequest) {
-        // 1. Check trùng username
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            // Dùng throw RuntimeException để cái GlobalExceptionHandler hôm nọ bắt và xử lý cho sạch
-            throw new RuntimeException("Tên đăng nhập đã tồn tại!");
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ResponseObject> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        try {
+            String message = authService.forgotPassword(request.getEmail());
+            // Trả về JSON chuẩn chỉ
+            return ResponseEntity.ok(
+                    new ResponseObject("SUCCESS", message, null)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    new ResponseObject("ERROR", e.getMessage(), null)
+            );
         }
+    }
 
-        // 2. ÉP BUỘC quyền mặc định là CUSTOMER (Không cho phép Frontend tự chọn Role)
-        Role role = roleRepository.findByRoleName("ROLE_CUSTOMER")
-                .orElseThrow(() -> new RuntimeException("Lỗi hệ thống: Không tìm thấy quyền Khách hàng."));
+    // ==========================================
+    // API Đặt Lại Mật Khẩu (Xác nhận OTP)
+    // ==========================================
+    @PostMapping("/reset-password")
+    public ResponseEntity<ResponseObject> resetPassword(@RequestBody ResetPasswordRequest request) {
+        try {
+            // Đã đổi thành request.getOtp()
+            authService.resetPassword(request.getOtp(), request.getNewPassword());
 
-        // 3. Tạo User mới
-        User user = new User();
-        user.setUsername(signUpRequest.getUsername());
-        user.setPassword(encoder.encode(signUpRequest.getPassword())); // Đã mã hóa
-        user.setRole(role);
-        user.setIsActive(true);
-
-        userRepository.save(user);
-
-        // 4. Tuyệt đối KHÔNG trả về object 'user' gốc để tránh lỗi Infinite Recursion
-        return ResponseEntity.ok(
-                new ResponseObject("SUCCESS", "Đăng ký tài khoản thành công!", null)
-        );
+            return ResponseEntity.ok(
+                    new ResponseObject("SUCCESS", "Mật khẩu của bạn đã được thay đổi thành công!", null)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    new ResponseObject("ERROR", e.getMessage(), null)
+            );
+        }
     }
 }
