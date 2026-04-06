@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"; // Thêm useEffect
 import "./LoginModal.css";
 import { useAuth } from "../context/AuthContext";
-import { ForgotPasswordModal } from "./ForgotPasswordModal";
+import { ForgotPasswordModal } from "./Forgotpasswordmodal";
 
 export const LoginModal = ({ onClose }) => {
   const { login, authLoading, authError, setAuthError } = useAuth();

@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./SalesPages.css";
 import { CreateQuote } from "./CreateQuote.jsx";
 import { EditQuote }   from "./EditQuote.jsx";
-import { useQuotations } from "../../hooks/useQuotations";
+import { useQuotations } from "../../hooks/Usequotations";
 import { getQuoteStatus } from "../../services/quotationService.js";
 import quotationService from "../../services/quotationService.js";
 import axios from "axios";

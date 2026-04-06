@@ -3,7 +3,7 @@ import "./SalesPages.css";
 import { CreateOrder } from "./CreateOrder.jsx";
 import { SalesOrderDetail } from "./SalesOrderDetail.jsx";
 import { useAuth } from "../../context/AuthContext";
-import { useSalesOrders } from "../../hooks/useSalesOrders";
+import { useSalesOrders } from "../../hooks/Usesalesorders";
 import { ApprovalModal } from "./ApprovalModal";
 import salesOrderService, { ORDER_STATUS_MAP, PAYMENT_STATUS_MAP } from "../../services/salesOrderService.js";
 import manufactureOrderService from "../../services/manufactureOrderService.js";
