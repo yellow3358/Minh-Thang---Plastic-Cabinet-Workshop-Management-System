@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./SalesLayout.css";
+import "./Saleslayout.css";
 import { useAuth } from "../context/AuthContext";
 import { SalesDashboard } from "../pages/sales/SalesDashboard";
 import { SalesProducts }  from "../pages/sales/SalesProducts.jsx";

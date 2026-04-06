@@ -2,8 +2,8 @@ import "./assets/global.css";
 import "./assets/button.css";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { DashboardLayout } from "./layouts/DashboardLayout";
-import { SalesLayout }     from "./layouts/SalesLayout";
-import { ResetPassword }   from "./components/ResetPassword";
+import { SalesLayout }     from "./layouts/Saleslayout";
+import { ResetPassword }   from "./components/Resetpassword";
 import { LoginModal }      from "./components/LoginModal";
 
 const isResetPage = () => window.location.pathname.startsWith("/reset-password");

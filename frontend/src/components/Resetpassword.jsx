@@ -5,7 +5,7 @@
 // ============================================================
 
 import { useState } from "react";
-import "./ResetPassword.css";
+import "./Resetpassword.css";
 import { useAuth } from "../context/AuthContext";
 
 export const ResetPassword = () => {
